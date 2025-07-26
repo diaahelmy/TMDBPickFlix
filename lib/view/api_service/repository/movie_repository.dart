@@ -3,13 +3,17 @@ import '../ApiService.dart';
 
 
 class MovieRepository {
-  final ApiService _apiService = ApiService();
+  final ApiService apiService;
 
-  Future<List<Movie>> fetchPopularMovies() async {
-    return await _apiService.fetchPopularMovies();
+  MovieRepository(this.apiService);
+
+  Future<List<Movie>> fetchPopularMovies() {
+    return apiService.fetchMovies("movie/top_rated");
   }
 
-  Future<List<Movie>> fetchTopRatedMovies() async {
-    return await _apiService.fetchTopRatedMovies();
+  Future<List<Movie>> fetchTopRatedWatchAllTime() {
+    return apiService.fetchMovies("tv/top_rated");
+
   }
+
 }

@@ -8,31 +8,69 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
 
   MovieBloc(this.repository) : super(MovieCombinedState()) {
     on<FetchPopularMovies>(_onFetchPopularMovies);
-    on<FetchTopRatedMovies>(_onFetchTopRatedMovies);
+    on<FetchTopRatedMovies>(_onFetchTopRatedWatchAllTime);
   }
-
   Future<void> _onFetchPopularMovies(
-      FetchPopularMovies event, Emitter<MovieState> emit) async {
-    final currentState = state is MovieCombinedState ? state as MovieCombinedState : MovieCombinedState();
-    emit(currentState.copyWith(isLoading: true));
+      FetchPopularMovies event,
+      Emitter<MovieState> emit,
+      ) async {
+    final currentState = state is MovieCombinedState
+        ? state as MovieCombinedState
+        : MovieCombinedState();
+
+    // ✅ لو البيانات موجودة بالفعل، متعملش تحميل تاني
+    if (currentState.popularMovies != null && currentState.popularMovies!.isNotEmpty) {
+      return;
+    }
+
+    emit(currentState.copyWith(isPopularLoading: true));
+
     try {
       final movies = await repository.fetchPopularMovies();
-      emit(currentState.copyWith(popularMovies: movies, isLoading: false));
+      emit(
+        currentState.copyWith(
+          popularMovies: movies,
+          isPopularLoading: false,
+          popularError: null,
+        ),
+      );
     } catch (e) {
-      emit(currentState.copyWith(error: e.toString(), isLoading: false));
+      emit(
+        currentState.copyWith(
+          popularError: e.toString(),
+          isPopularLoading: false,
+        ),
+      );
     }
   }
 
-  Future<void> _onFetchTopRatedMovies(
-      FetchTopRatedMovies event, Emitter<MovieState> emit) async {
-    final currentState = state is MovieCombinedState ? state as MovieCombinedState : MovieCombinedState();
-    emit(currentState.copyWith(isLoading: true));
+  Future<void> _onFetchTopRatedWatchAllTime(
+    FetchTopRatedMovies event,
+    Emitter<MovieState> emit,
+  ) async {
+    final currentState = state is MovieCombinedState
+        ? state as MovieCombinedState
+        : MovieCombinedState();
+    emit(currentState.copyWith(isTopRatedLoading: true));
     try {
-      final movies = await repository.fetchTopRatedMovies();
-      emit(currentState.copyWith(topRatedMovies: movies, isLoading: false));
+      final movies = await repository.fetchTopRatedWatchAllTime();
+      emit(
+        currentState.copyWith(
+          topRatedMovies: movies,
+          isTopRatedLoading: false,
+          topRatedError: null,
+        ),
+      );
     } catch (e) {
-      emit(currentState.copyWith(error: e.toString(), isLoading: false));
+      emit(
+        currentState.copyWith(
+          topRatedError: e.toString(),
+          isTopRatedLoading: false,
+        ),
+      );
     }
   }
-}
 
+
+
+}

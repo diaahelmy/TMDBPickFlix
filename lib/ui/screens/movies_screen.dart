@@ -1,124 +1,149 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../models/movie_model.dart';
-import '../../view/cubit/movie/movie_bloc.dart';
-import '../../view/cubit/movie/movie_state.dart';
-import '../../view/data/movie_event.dart';
+  import 'package:flutter/material.dart';
+  import 'package:flutter_bloc/flutter_bloc.dart';
+  import '../../models/movie_model.dart';
+  import '../../view/cubit/movie/movie_bloc.dart';
+  import '../../view/cubit/movie/movie_state.dart';
+  import '../../view/data/movie_event.dart';
+  import '../component/movie_grid.dart';
+  import '../component/section_title.dart';
 
-class MoviesScreen extends StatefulWidget {
-  const MoviesScreen({super.key});
+  class MoviesScreen extends StatefulWidget {
+    const MoviesScreen({super.key});
 
-  @override
-  State<MoviesScreen> createState() => _MoviesScreenState();
-}
-
-class _MoviesScreenState extends State<MoviesScreen> {
-  @override
-  void initState() {
-    super.initState();
-    final movieBloc = context.read<MovieBloc>();
-    movieBloc.add(FetchPopularMovies());
-    movieBloc.add(FetchTopRatedMovies());
+    @override
+    State<MoviesScreen> createState() => _MoviesScreenState();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Popular & Top Rated")),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const _SectionTitle(title: "Popular Movies"),
-            BlocBuilder<MovieBloc, MovieState>(
-              builder: (context, state) {
-                if (state is MovieCombinedState) {
-                  if (state.popularMovies != null) {
-                    return _buildGrid(state.popularMovies!);
-                  } else if (state.isLoading) {
-                    return const CircularProgressIndicator();
-                  } else if (state.error != null) {
-                    return Text("Error: ${state.error}");
-                  }
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-            const SizedBox(height: 24),
-            const _SectionTitle(title: "Top Rated Movies"),
-            BlocBuilder<MovieBloc, MovieState>(
-              builder: (context, state) {
-                if (state is MovieCombinedState) {
-                  if (state.topRatedMovies != null) {
-                    return _buildGrid(state.topRatedMovies!);
-                  } else if (state.isLoading) {
-                    return const CircularProgressIndicator();
-                  } else if (state.error != null) {
-                    return Text("Error: ${state.error}");
-                  }
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  class _MoviesScreenState extends State<MoviesScreen> {
+    bool topRatedLoaded = false;
+    final Set<Movie> selectedMovies = {};
 
-  Widget _buildGrid(List<Movie> movies) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: movies.length > 12 ? 12 : movies.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 2 / 3,
-      ),
-      itemBuilder: (context, index) {
-        final movie = movies[index];
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    @override
+    void initState() {
+      super.initState();
+      context.read<MovieBloc>().add(FetchPopularMovies());
+    }
+
+    void _handleScroll(ScrollNotification notification) {
+      if (notification.metrics.pixels >=
+          notification.metrics.maxScrollExtent - 200) {
+        if (!topRatedLoaded) {
+          context.read<MovieBloc>().add(FetchTopRatedMovies());
+          setState(() {
+            topRatedLoaded = true;
+          });
+        }
+      }
+    }
+
+    void toggleSelection(Movie movie) {
+      setState(() {
+        if (selectedMovies.contains(movie)) {
+          selectedMovies.remove(movie);
+        } else {
+          selectedMovies.add(movie);
+        }
+      });
+    }
+
+    @override
+    Widget build(BuildContext context) {
+      final theme = Theme.of(context);
+
+      return Scaffold(
+        appBar: AppBar(title: const Text("Choose Favorite Movies")),
+        body: Stack(
           children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  'https://image.tmdb.org/t/p/w500${movie.posterPath}',
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
+            NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                _handleScroll(notification);
+                return true;
+              },
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      selectedMovies.length < 3
+                          ? "Pick at least 3 movies to continue"
+                          : "Great! You can continue",
+                      style: TextStyle(
+                        color: selectedMovies.length < 3
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.primary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    /// ✅ Popular Movies
+                    const SectionTitle(title: "Popular Movies"),
+                    BlocBuilder<MovieBloc, MovieState>(
+                      builder: (context, state) {
+                        if (state is MovieCombinedState) {
+                          if (state.popularMovies != null &&
+                              state.popularMovies!.isNotEmpty) {
+                            return MovieGrid(
+                              movies: state.popularMovies!,
+                              itemLimit: 12,
+                              selectedMovies: selectedMovies,
+                              onMovieTap: toggleSelection,
+                            );
+                          } else if (state.isPopularLoading) {
+                            return const Center(child: CircularProgressIndicator());
+                          } else if (state.popularError != null) {
+                            return Text("Error: ${state.popularError}");
+                          }
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    /// ✅ Top Rated Movies
+                    const SectionTitle(title: "Top Rated Watch All Time"),
+                    BlocBuilder<MovieBloc, MovieState>(
+                      builder: (context, state) {
+                        if (state is MovieCombinedState) {
+                          if (state.topRatedMovies != null &&
+                              state.topRatedMovies!.isNotEmpty) {
+                            return MovieGrid(
+                              movies: state.topRatedMovies!,
+                              itemLimit: 12,
+                              selectedMovies: selectedMovies,
+                              onMovieTap: toggleSelection,
+                            );
+                          } else if (state.isTopRatedLoading) {
+                            return const Center(child: CircularProgressIndicator());
+                          } else if (state.topRatedError != null) {
+                            return Text("Error: ${state.topRatedError}");
+                          }
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),
-            const SizedBox(height: 6),
-            Text(
-              movie.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-            ),
+
+            if (selectedMovies.length >= 3)
+              Positioned(
+                bottom: 16,
+                left: 16,
+                right: 16,
+                child: FilledButton(
+                  onPressed: () {
+                    print("Selected Movies: ${selectedMovies.length}");
+                  },
+                  child: const Text("Next"),
+                ),
+              ),
           ],
-        );
-      },
-    );
+        ),
+      );
+    }
   }
-}
-
-class _SectionTitle extends StatelessWidget {
-  final String title;
-  const _SectionTitle({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.titleLarge,
-      ),
-    );
-  }
-}
