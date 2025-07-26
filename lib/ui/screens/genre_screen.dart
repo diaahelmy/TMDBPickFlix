@@ -11,44 +11,46 @@ class GenreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Select Your Favorite Genres")),
+      appBar: AppBar(title: const Text("Select Your Favorite Movies")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: BlocBuilder<CubitSplitScreenBloc, StateSplitScreen>(
           builder: (context, state) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Movie Genres', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: state.movieGenres.map((genre) {
-                    return FilterChip(
-                      label: Text(genre.name),
-                      selected: genre.isSelected,
-                      onSelected: (_) {
-                        context.read<CubitSplitScreenBloc>().add(ToggleGenreSelection(genre.id));
-                      },
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 20),
-                const Text('TV Show Genres', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: state.tvGenres.map((genre) {
-                    return FilterChip(
-                      label: Text(genre.name),
-                      selected: genre.isSelected,
-                      onSelected: (_) {
-                        context.read<CubitSplitScreenBloc>().add(ToggleGenreSelection(genre.id));
-                      },
-                    );
-                  }).toList(),
-                ),
-              ],
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Movie Genres', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: state.movieGenres.map((genre) {
+                      return FilterChip(
+                        label: Text(genre.name),
+                        selected: genre.isSelected,
+                        onSelected: (_) {
+                          context.read<CubitSplitScreenBloc>().add(ToggleGenreSelection(genre.id));
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text('TV Show Genres', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: state.tvGenres.map((genre) {
+                      return FilterChip(
+                        label: Text(genre.name),
+                        selected: genre.isSelected,
+                        onSelected: (_) {
+                          context.read<CubitSplitScreenBloc>().add(ToggleGenreSelection(genre.id));
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
             );
           },
         ),

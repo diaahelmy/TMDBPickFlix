@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pick_flix/ui/screens/genre_screen.dart';
 import 'package:pick_flix/view/cubit/split_screen/cubit_split_screen.dart';
 import 'package:pick_flix/view/data/genre_event.dart';
+import 'package:pick_flix/view/themes/appthemes.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,10 +19,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Genre Selector',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),
-          useMaterial3: true,
-        ),
+        theme: AppTheme.lightTheme,
         home: const GenreScreen(),
       ),
     );
