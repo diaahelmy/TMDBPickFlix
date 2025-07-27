@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // ✅ لازم عشان .w و .h و .sp
+import 'package:pick_flix/ui/screens/main_screen.dart';
 import '../../view/cubit/movie/movie_bloc.dart';
 import '../../view/cubit/movie/movie_state.dart';
 import '../../view/data/movie_event.dart';
@@ -139,7 +140,7 @@ class FavoritesSelectionScreen extends StatelessWidget {
             selectedCount: state.selectedMovies.length,
             minimumSelection: minimumSelection,
             onContinue: () {
-              navigateAndFinish(context, const GenreScreen());
+              navigateAndFinish(context, const MainScreen());
             },
           );
         },

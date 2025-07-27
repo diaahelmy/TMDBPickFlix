@@ -58,7 +58,7 @@ packages:
     source: hosted
     version: "1.0.8"
   equatable:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: equatable
       sha256: "567c64b3cb4cf82397aac55f4f0cbd3ca20d77c6c03bedbc4ceaddc08904aef7"
@@ -66,7 +66,7 @@ packages:
     source: hosted
     version: "2.0.7"
   events_emitter:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: events_emitter
       sha256: d1024256ec6f6ddb18120351c7979d3986fe8d0a3b59c9f57a066e43542187de
@@ -87,7 +87,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_bloc:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: flutter_bloc
       sha256: cf51747952201a455a1c840f8171d273be009b932c75093020f9af64f2123e38
@@ -103,7 +103,7 @@ packages:
     source: hosted
     version: "5.0.0"
   flutter_screenutil:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: flutter_screenutil
       sha256: "8239210dd68bee6b0577aa4a090890342d04a136ce1c81f98ee513fc0ce891de"
@@ -116,7 +116,7 @@ packages:
     source: sdk
     version: "0.0.0"
   http:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: http
       sha256: "2c11f3f94c687ee9bad77c171151672986360b2b001d109814ee7140b2cf261b"
