@@ -12,7 +12,6 @@ import '../component/selection_status_widget.dart';
 import '../component/loading_grid_widget.dart';
 import '../component/error_widget.dart';
 import '../component/bottom_button_widget.dart';
-import 'genre_screen.dart';
 import '../component/navigation_helper.dart';
 
 class FavoritesSelectionScreen extends StatelessWidget {
@@ -21,12 +20,15 @@ class FavoritesSelectionScreen extends StatelessWidget {
   final int minimumSelection = 3;
 
   void _handleScroll(BuildContext context, ScrollNotification notification) {
-    final state = context.read<MovieBloc>().state as MovieCombinedState;
-    if (notification.metrics.pixels >=
-        notification.metrics.maxScrollExtent - 200 &&
-        !state.topRatedLoaded) {
-      context.read<MovieBloc>().add(FetchTopRatedTv());
-      context.read<MovieBloc>().add(MarkTopRatedLoaded());
+    // تأكد من أن state هو MovieCombinedState قبل الوصول إلى خصائصه
+    final movieState = context.read<MovieBloc>().state;
+    if (movieState is MovieCombinedState) {
+      if (notification.metrics.pixels >=
+          notification.metrics.maxScrollExtent - 200 &&
+          !movieState.topRatedLoaded) { // افترض أن topRatedLoaded تشير إلى تحميل قائمة المسلسلات
+        context.read<MovieBloc>().add(FetchTopRatedTv());
+        context.read<MovieBloc>().add(MarkTopRatedLoaded());
+      }
     }
   }
 
@@ -55,12 +57,22 @@ class FavoritesSelectionScreen extends StatelessWidget {
                   return true;
                 },
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 100.h), // ✅ تم تحويل الأبعاد
+                  padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 100.h),
                   child: BlocBuilder<MovieBloc, MovieState>(
                     builder: (context, state) {
                       if (state is! MovieCombinedState) {
+                        // في حالة لم يتم تهيئة الـ state بعد أو نوعه مختلف
                         return const LoadingGridWidget();
                       }
+
+                      // عرض مؤشر تحميل رئيسي إذا كانت كلتا القائمتين قيد التحميل أو لم يتم تحميلهما بعد
+                      // وليس هناك أخطاء
+                      if (state.isTopRatedLoading && state.isTopRatedTvLoading &&
+                          state.topRatedMovies == null && state.topRatedTv == null &&
+                          state.topRatedError == null && state.topRatedTvError == null ) {
+                        return const LoadingGridWidget();
+                      }
+
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,7 +81,7 @@ class FavoritesSelectionScreen extends StatelessWidget {
                             selectedCount: state.selectedMovies.length,
                             minimumSelection: minimumSelection,
                           ),
-                          SizedBox(height: 24.h), // ✅ responsive spacing
+                          SizedBox(height: 24.h),
 
                           // ✅ Top Rated Movies Section
                           if (state.topRatedMovies?.isNotEmpty ?? false) ...[
@@ -85,12 +97,13 @@ class FavoritesSelectionScreen extends StatelessWidget {
                                 );
                               },
                             ),
-                            if (state.isTopRatedLoading) ...[
-                              const LoadingGridWidget(),
-                            ],
-                          ] else if (state.isTopRatedLoading) ...[
+                          ] else if (state.isTopRatedLoading && state.topRatedMovies == null) ...[
+                            // عرض التحميل فقط إذا كانت الأفلام قيد التحميل ولم يتم تحميلها بعد
+                            const SectionTitle(title: "Top Rated Movies"), // اختياري: عرض العنوان أثناء التحميل
+                            SizedBox(height: 8.h),
                             const LoadingGridWidget(),
-                          ] else if (state.topRatedError != null) ...[
+                          ] else if (state.topRatedError != null && state.topRatedMovies == null) ...[
+                            // عرض الخطأ فقط إذا كان هناك خطأ ولم يتم تحميل الأفلام
                             ErrorWidgetCustom(message: state.topRatedError!),
                           ],
 
@@ -110,14 +123,16 @@ class FavoritesSelectionScreen extends StatelessWidget {
                                 );
                               },
                             ),
-                            SizedBox(height: 32.h),
-                          ],
-                          if (state.isTopRatedTvLoading) ...[
+                          ] else if (state.isTopRatedTvLoading && state.topRatedTv == null) ...[
+                            // عرض التحميل فقط إذا كانت المسلسلات قيد التحميل ولم يتم تحميلها بعد
+                            const SectionTitle(title: "Top Rated TV"), // اختياري: عرض العنوان أثناء التحميل
+                            SizedBox(height: 8.h),
                             const LoadingGridWidget(),
-                          ],
-                          if (state.topRatedTvError != null) ...[
+                          ] else if (state.topRatedTvError != null && state.topRatedTv == null) ...[
+                            // عرض الخطأ فقط إذا كان هناك خطأ ولم يتم تحميل المسلسلات
                             ErrorWidgetCustom(message: state.topRatedTvError!),
                           ],
+                          SizedBox(height: 32.h), // مسافة إضافية في الأسفل إذا لزم الأمر
                         ],
                       );
                     },
@@ -128,8 +143,6 @@ class FavoritesSelectionScreen extends StatelessWidget {
           ],
         ),
       ),
-
-      // ✅ Bottom Button Widget
       bottomNavigationBar: BlocBuilder<MovieBloc, MovieState>(
         builder: (context, state) {
           if (state is! MovieCombinedState) return const SizedBox();

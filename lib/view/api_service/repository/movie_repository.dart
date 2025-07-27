@@ -15,6 +15,10 @@ class MovieRepository {
     return apiService.fetchMovies("movie/top_rated");
 
   }
+  Future<List<Movie>> fetchUpComingMovies() {
+    return apiService.fetchMovies("movie/upcoming");
+  }
+
   // ✅ Add separate method for popular movies
   Future<List<Movie>> fetchPopularMovies() {
     return apiService.fetchMovies("movie/popular"); // This will get popular movies
