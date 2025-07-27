@@ -1,9 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart';
+
 import '../../view/cubit/main/main_bloc.dart';
 import '../../view/cubit/main/main_state.dart';
-
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
@@ -11,12 +11,14 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<MainCubit, MainState>(
-      bloc: MainCubit.get(context), // أو BlocProvider.of<MainCubit>(context)
       listener: (context, state) {
-
         if (state is MainErrorState) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage)),
+            SnackBar(
+              content: Text(state.errorMessage),
+              backgroundColor: Theme.of(context).colorScheme.error,
+              behavior: SnackBarBehavior.floating,
+            ),
           );
         }
       },
@@ -24,11 +26,16 @@ class MainScreen extends StatelessWidget {
         var cubit = MainCubit.get(context);
 
         return Scaffold(
-          body: cubit.page[cubit.currentIndex],
+          body: cubit.pages[cubit.currentIndex],
           bottomNavigationBar: BottomNavigationBar(
             currentIndex: cubit.currentIndex,
             onTap: (index) => cubit.changeBottomNav(index),
-            items:cubit.bottomItems,
+            items: cubit.bottomItems,
+            type: BottomNavigationBarType.fixed, // Ensures all tabs are visible
+            selectedItemColor: Theme.of(context).colorScheme.primary,
+            unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            elevation: 8,
           ),
         );
       },

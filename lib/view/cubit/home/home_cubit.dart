@@ -27,6 +27,25 @@ class HomeCubit extends  Cubit<HomeState>{
       emit(HomePopularError(e.toString()));
     }
   }
-
+  Future<void> fetchHomeTopRatedMovies() async {
+    emit(HomeTopRateLoading());
+    try {
+      final movies = await repository.fetchTopRatedMovies();
+      emit(HomeTopRateLoaded(movies));
+    } catch (e) {
+      emit(HomeTopRateError(e.toString()));
+    }
+  }
+  // Refresh all data
+  Future<void> refreshAllData() async {
+    await fetchAllMovies();
+  }
+  Future<void> fetchAllMovies() async {
+    await Future.wait([
+      fetchHomePopularMovies(),
+      fetchHomeUpComingMovies(),
+      fetchHomeTopRatedMovies(),
+    ]);
+  }
 
 }
