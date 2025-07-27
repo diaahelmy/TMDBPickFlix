@@ -5,37 +5,48 @@ abstract class MovieState {}
 class MovieInitial extends MovieState {}
 
 class MovieCombinedState extends MovieState {
-  final List<Movie>? popularMovies;
+  final List<Movie>? topRatedTv;
   final List<Movie>? topRatedMovies;
-  final bool isPopularLoading;
+  final bool isTopRatedTvLoading;
   final bool isTopRatedLoading;
-  final String? popularError;
+  final String? topRatedTvError;
   final String? topRatedError;
 
+  final Set<Movie> selectedMovies;
+  final bool topRatedLoaded;
+
   MovieCombinedState({
-    this.popularMovies,
+    this.topRatedTv,
     this.topRatedMovies,
-    this.isPopularLoading = false,
+    this.isTopRatedTvLoading = false,
     this.isTopRatedLoading = false,
-    this.popularError,
+    this.topRatedTvError,
     this.topRatedError,
-  });
+    Set<Movie>? selectedMovies,
+    this.topRatedLoaded = false,
+  }) : selectedMovies = selectedMovies ?? {};
+
 
   MovieCombinedState copyWith({
-    List<Movie>? popularMovies,
+    List<Movie>? topRatedTv,
     List<Movie>? topRatedMovies,
-    bool? isPopularLoading,
+    bool? isTopRatedTvLoading,
     bool? isTopRatedLoading,
-    String? popularError,
+    String? topRatedTvError,
     String? topRatedError,
+    Set<Movie>? selectedMovies,
+    bool? topRatedLoaded,
   }) {
     return MovieCombinedState(
-      popularMovies: popularMovies ?? this.popularMovies,
+      topRatedTv: topRatedTv ?? this.topRatedTv,
       topRatedMovies: topRatedMovies ?? this.topRatedMovies,
-      isPopularLoading: isPopularLoading ?? this.isPopularLoading,
+      isTopRatedTvLoading: isTopRatedTvLoading ?? this.isTopRatedTvLoading,
       isTopRatedLoading: isTopRatedLoading ?? this.isTopRatedLoading,
-      popularError: popularError ?? this.popularError,
+      topRatedTvError: topRatedTvError ?? this.topRatedTvError,
       topRatedError: topRatedError ?? this.topRatedError,
+      selectedMovies: selectedMovies ?? this.selectedMovies,
+      topRatedLoaded: topRatedLoaded ?? this.topRatedLoaded,
+
     );
   }
 }

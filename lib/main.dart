@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pick_flix/ui/screens/genre_screen.dart';
+import 'package:pick_flix/ui/screens/movies_screen.dart';
 import 'package:pick_flix/view/api_service/ApiService.dart';
 import 'package:pick_flix/view/api_service/repository/movie_repository.dart';
 import 'package:pick_flix/view/cubit/movie/movie_bloc.dart';
 import 'package:pick_flix/view/cubit/split_screen/cubit_split_screen.dart';
 import 'package:pick_flix/view/data/genre_event.dart';
+import 'package:pick_flix/view/data/movie_event.dart';
 import 'package:pick_flix/view/themes/appthemes.dart';
 
 void main() {
-
   final apiService = ApiService();
   final repository = MovieRepository(apiService);
-
 
   runApp(MyApp(repository: repository));
 }
@@ -26,9 +26,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-
-        BlocProvider(create: (_) => MovieBloc(repository)),
-
+        BlocProvider(
+          create: (context) => MovieBloc(repository)
+            ..add(FetchTopRatedMovies())
+            ..add(FetchTopRatedTv()),
+          child: const FavoritesSelectionScreen(),
+        ),
 
         BlocProvider(create: (_) => CubitSplitScreenBloc()..add(LoadGenres())),
       ],
@@ -36,6 +39,8 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'PickFlix',
         theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
         home: const GenreScreen(),
       ),
     );

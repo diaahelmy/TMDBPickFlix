@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pick_flix/view/cubit/split_screen/cubit_split_screen.dart';
-
 import '../../view/cubit/split_screen/states_split_screen.dart';
 import '../../view/data/genre_event.dart';
 import '../component/bottom_button_widget.dart';
@@ -50,7 +49,7 @@ class GenreScreen extends StatelessWidget {
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: state.tvGenres.map((genre) {
+                    children: state.movieGenres.map((genre) {
                       final theme = Theme.of(context);
                       final isSelected = genre.isSelected;
 
@@ -107,7 +106,7 @@ class GenreScreen extends StatelessWidget {
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: state.movieGenres.map((genre) {
+                    children: state.tvGenres.map((genre) {
                       final theme = Theme.of(context);
                       final isSelected = genre.isSelected;
 
@@ -159,7 +158,6 @@ class GenreScreen extends StatelessWidget {
         ),
       ),
 
-      // ✅ البوتوم بوتن الجديد
       bottomNavigationBar: BlocBuilder<CubitSplitScreenBloc, StateSplitScreen>(
         builder: (context, state) {
           final selectedCount = _calculateSelectedCount(state);

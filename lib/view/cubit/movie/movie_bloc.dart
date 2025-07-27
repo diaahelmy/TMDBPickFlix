@@ -1,43 +1,67 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../models/movie_model.dart';
 import '../../api_service/repository/movie_repository.dart';
 import '../../data/movie_event.dart';
 import 'movie_state.dart';
 
 class MovieBloc extends Bloc<MovieEvent, MovieState> {
   final MovieRepository repository;
+  final Set<Movie> selectedMovies = <Movie>{};
+  bool topRatedLoaded = false;
+
 
   MovieBloc(this.repository) : super(MovieCombinedState()) {
-    on<FetchPopularMovies>(_onFetchPopularMovies);
+    on<FetchTopRatedTv>(_onFetchTopRatedTv);
     on<FetchTopRatedMovies>(_onFetchTopRatedWatchAllTime);
+
+    on<ToggleMovieSelection>((event, emit) {
+      final currentState = state as MovieCombinedState;
+      final updatedSet = Set<Movie>.from(currentState.selectedMovies);
+
+      if (updatedSet.contains(event.movie)) {
+        updatedSet.remove(event.movie);
+      } else {
+        updatedSet.add(event.movie);
+      }
+
+      emit(currentState.copyWith(selectedMovies: updatedSet));
+    });
+
+    on<MarkTopRatedLoaded>((event, emit) {
+      final currentState = state as MovieCombinedState;
+      emit(currentState.copyWith(topRatedLoaded: true));
+    });
   }
-  Future<void> _onFetchPopularMovies(
-      FetchPopularMovies event,
+
+  Future<void> _onFetchTopRatedTv(
+      FetchTopRatedTv event,
       Emitter<MovieState> emit,
       ) async {
     final currentState = state is MovieCombinedState
         ? state as MovieCombinedState
         : MovieCombinedState();
 
-    if (currentState.popularMovies != null && currentState.popularMovies!.isNotEmpty) {
-      return;
+    if (currentState.topRatedTv != null && currentState.topRatedTv!.isNotEmpty) {
+      return  ;
     }
 
-    emit(currentState.copyWith(isPopularLoading: true));
+    emit(currentState.copyWith(isTopRatedTvLoading: true));
 
     try {
-      final movies = await repository.fetchTopRatedMovies();
+      final movies = await repository.fetchTopRatedTv();
+
       emit(
         currentState.copyWith(
-          popularMovies: movies,
-          isPopularLoading: false,
-          popularError: null,
+          topRatedTv: movies,
+          isTopRatedTvLoading: false,
+          topRatedTvError: null,
         ),
       );
     } catch (e) {
       emit(
         currentState.copyWith(
-          popularError: e.toString(),
-          isPopularLoading: false,
+          topRatedTvError: e.toString(),
+          isTopRatedTvLoading: false,
         ),
       );
     }
@@ -55,7 +79,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     }
     emit(currentState.copyWith(isTopRatedLoading: true));
     try {
-      final movies = await repository.fetchTopRatedWatchAllTime();
+      final movies = await repository.fetchTopRatedMovies();
       emit(
         currentState.copyWith(
           topRatedMovies: movies,
