@@ -68,7 +68,7 @@ class _FavoritesSelectionScreenState extends State<FavoritesSelectionScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // ✅ استبدال _buildHeader
+
             HeaderWidget(
               minimumSelection: minimumSelection,
               currentSelection: selectedMovies.length,
@@ -89,7 +89,7 @@ class _FavoritesSelectionScreenState extends State<FavoritesSelectionScreen> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // ✅ استبدال _buildSelectionStatus
+
                             SelectionStatusWidget(
                               selectedCount: selectedMovies.length,
                               minimumSelection: minimumSelection,
@@ -110,7 +110,7 @@ class _FavoritesSelectionScreenState extends State<FavoritesSelectionScreen> {
                             ] else if (state.isPopularLoading) ...[
                               const SectionTitle(title: "Popular Movies"),
                               const SizedBox(height: 16),
-                              // ✅ استبدال _buildLoadingGrid
+
                               const LoadingGridWidget(),
                               const SizedBox(height: 32),
                             ],
@@ -136,7 +136,7 @@ class _FavoritesSelectionScreenState extends State<FavoritesSelectionScreen> {
                               const SizedBox(height: 32),
                             ],
 
-                            // ✅ استبدال _buildErrorWidget
+
                             if (state.popularError != null)
                               ErrorWidgetCustom(
                                   message:
@@ -150,7 +150,7 @@ class _FavoritesSelectionScreenState extends State<FavoritesSelectionScreen> {
                         );
                       }
 
-                      // Initial loading state
+
                       return Column(
                         children: [
                           SelectionStatusWidget(
@@ -172,7 +172,6 @@ class _FavoritesSelectionScreenState extends State<FavoritesSelectionScreen> {
         ),
       ),
 
-      // ✅ استبدال _buildBottomButton
       bottomNavigationBar: BottomButtonWidget(
         isEnabled: isMinimumMet,
         selectedCount: selectedMovies.length,
