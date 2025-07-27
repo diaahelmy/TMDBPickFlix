@@ -1,10 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../api_service/repository/movie_repository.dart';
 import 'home_state.dart';
+import '../../../models/movie_model.dart';
 
-class HomeCubit extends  Cubit<HomeState>{
+class HomeCubit extends Cubit<HomeState> {
   final MovieRepository repository;
+
+  int _popularCurrentPage = 1;
+  List<Movie> _popularMovies = [];
+  bool isLoadingMore = false; // ✅ أضف دي
 
   HomeCubit(this.repository) : super(HomeInitial());
 
@@ -18,15 +22,40 @@ class HomeCubit extends  Cubit<HomeState>{
     }
   }
 
-  Future<void> fetchHomePopularMovies() async {
-    emit(HomePopularLoading());
+  Future<void> fetchHomePopularMovies({bool loadMore = false}) async {
     try {
-      final movies = await repository.fetchPopularMovies();
-      emit(HomePopularLoaded(movies));
+      if (!loadMore) {
+        if (isLoadingMore) return; // ✅ منع التكرار
+
+        _popularCurrentPage = 1;
+        emit(HomePopularLoading());
+      } else {
+        if (isLoadingMore) return;
+        isLoadingMore = true;
+        _popularCurrentPage++;
+        emit(
+          HomePopularLoaded(List.of(_popularMovies)),
+        ); // لتحديث الـ UI بعلامة التحميل تحت
+      }
+
+      final newMovies = await repository.fetchPopularMovies(
+        page: _popularCurrentPage,
+      );
+
+      if (loadMore) {
+        _popularMovies.addAll(newMovies);
+      } else {
+        _popularMovies = newMovies;
+      }
+
+      emit(HomePopularLoaded(List.of(_popularMovies)));
     } catch (e) {
       emit(HomePopularError(e.toString()));
+    } finally {
+      isLoadingMore = false; // ✅ ضروري جدًا تحطها هنا سواء حصل خطأ أو لا
     }
   }
+
   Future<void> fetchHomeTopRatedMovies() async {
     emit(HomeTopRateLoading());
     try {
@@ -36,10 +65,12 @@ class HomeCubit extends  Cubit<HomeState>{
       emit(HomeTopRateError(e.toString()));
     }
   }
+
   // Refresh all data
   Future<void> refreshAllData() async {
     await fetchAllMovies();
   }
+
   Future<void> fetchAllMovies() async {
     await Future.wait([
       fetchHomePopularMovies(),
@@ -47,5 +78,4 @@ class HomeCubit extends  Cubit<HomeState>{
       fetchHomeTopRatedMovies(),
     ]);
   }
-
 }

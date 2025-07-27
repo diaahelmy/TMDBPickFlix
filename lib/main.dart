@@ -47,6 +47,7 @@ class MyApp extends StatelessWidget {
             BlocProvider(
               create: (context) => HomeCubit(repository)..fetchHomeUpComingMovies()..fetchHomePopularMovies()..fetchHomeTopRatedMovies(),
             ),
+
           ],
           child: MaterialApp(
             debugShowCheckedModeBanner: false,

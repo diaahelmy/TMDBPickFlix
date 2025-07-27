@@ -1,4 +1,8 @@
+import 'dart:ui';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import '../../models/movie_model.dart';
 
 class MovieGrid extends StatelessWidget {
@@ -6,6 +10,8 @@ class MovieGrid extends StatelessWidget {
   final Set<Movie>? selectedMovies;
   final Function(Movie)? onMovieTap;
   final int? itemLimit;
+  final int crossAxisCount;
+  final bool showDetails;
 
   const MovieGrid({
     super.key,
@@ -13,6 +19,8 @@ class MovieGrid extends StatelessWidget {
     this.selectedMovies,
     this.onMovieTap,
     this.itemLimit,
+    this.crossAxisCount=3,
+    this.showDetails =false,
   });
 
   @override
@@ -26,8 +34,8 @@ class MovieGrid extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: displayed.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
         childAspectRatio: 0.6,
@@ -157,6 +165,41 @@ class MovieGrid extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+
+                  if (showDetails)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        movie.overview,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: 11,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  if (showDetails)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.star, size: 14, color: Colors.amber),
+                          SizedBox(width: 4),
+                          Text(
+                            movie.voteAverage.toStringAsFixed(1),
+                            style: theme.textTheme.labelMedium,
+                          ),
+                          // يمكنك لاحقًا إضافة مدة الفيلم هنا:
+                          // SizedBox(width: 8),
+                          // Icon(Icons.schedule, size: 14, color: Colors.grey),
+                          // Text("120 min", style: theme.textTheme.labelMedium),
+                        ],
+                      ),
+                    ),
+
                 ],
               ),
             ),

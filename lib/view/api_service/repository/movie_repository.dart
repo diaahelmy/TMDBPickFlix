@@ -20,8 +20,7 @@ class MovieRepository {
   }
 
   // ✅ Add separate method for popular movies
-  Future<List<Movie>> fetchPopularMovies() {
-    return apiService.fetchMovies("movie/popular"); // This will get popular movies
+  Future<List<Movie>> fetchPopularMovies({int page = 1}) {
+    return apiService.fetchMovies("movie/popular", page: page);
   }
-
 }
