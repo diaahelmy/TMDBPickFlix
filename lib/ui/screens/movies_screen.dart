@@ -1,149 +1,187 @@
-  import 'package:flutter/material.dart';
-  import 'package:flutter_bloc/flutter_bloc.dart';
-  import '../../models/movie_model.dart';
-  import '../../view/cubit/movie/movie_bloc.dart';
-  import '../../view/cubit/movie/movie_state.dart';
-  import '../../view/data/movie_event.dart';
-  import '../component/movie_grid.dart';
-  import '../component/section_title.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pick_flix/ui/component/navigation_helper.dart';
 
-  class MoviesScreen extends StatefulWidget {
-    const MoviesScreen({super.key});
+import '../../models/movie_model.dart';
+import '../../view/cubit/movie/movie_bloc.dart';
+import '../../view/cubit/movie/movie_state.dart';
+import '../../view/data/movie_event.dart';
 
-    @override
-    State<MoviesScreen> createState() => _MoviesScreenState();
+// ✅ Widgets اللي فصلناها
+import '../component/movie_grid.dart';
+import '../component/section_title.dart';
+import '../component/header_widget.dart';
+import '../component/selection_status_widget.dart';
+import '../component/loading_grid_widget.dart';
+import '../component/error_widget.dart';
+import '../component/bottom_button_widget.dart';
+import 'genre_screen.dart';
+
+class FavoritesSelectionScreen extends StatefulWidget {
+  const FavoritesSelectionScreen({super.key});
+
+  @override
+  State<FavoritesSelectionScreen> createState() =>
+      _FavoritesSelectionScreenState();
+}
+
+class _FavoritesSelectionScreenState extends State<FavoritesSelectionScreen> {
+  final Set<Movie> selectedMovies = <Movie>{};
+  final int minimumSelection = 3;
+  bool topRatedLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<MovieBloc>().add(FetchPopularMovies());
   }
 
-  class _MoviesScreenState extends State<MoviesScreen> {
-    bool topRatedLoaded = false;
-    final Set<Movie> selectedMovies = {};
-
-    @override
-    void initState() {
-      super.initState();
-      context.read<MovieBloc>().add(FetchPopularMovies());
-    }
-
-    void _handleScroll(ScrollNotification notification) {
-      if (notification.metrics.pixels >=
-          notification.metrics.maxScrollExtent - 200) {
-        if (!topRatedLoaded) {
-          context.read<MovieBloc>().add(FetchTopRatedMovies());
-          setState(() {
-            topRatedLoaded = true;
-          });
-        }
+  void _handleScroll(ScrollNotification notification) {
+    if (notification.metrics.pixels >=
+        notification.metrics.maxScrollExtent - 200) {
+      if (!topRatedLoaded) {
+        context.read<MovieBloc>().add(FetchTopRatedMovies());
+        setState(() {
+          topRatedLoaded = true;
+        });
       }
     }
+  }
 
-    void toggleSelection(Movie movie) {
-      setState(() {
-        if (selectedMovies.contains(movie)) {
-          selectedMovies.remove(movie);
-        } else {
-          selectedMovies.add(movie);
-        }
-      });
-    }
+  void toggleMovieSelection(Movie movie) {
+    setState(() {
+      if (selectedMovies.contains(movie)) {
+        selectedMovies.remove(movie);
+      } else {
+        selectedMovies.add(movie);
+      }
+    });
+  }
 
-    @override
-    Widget build(BuildContext context) {
-      final theme = Theme.of(context);
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isMinimumMet = selectedMovies.length >= minimumSelection;
 
-      return Scaffold(
-        appBar: AppBar(title: const Text("Choose Favorite Movies")),
-        body: Stack(
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Column(
           children: [
-            NotificationListener<ScrollNotification>(
-              onNotification: (notification) {
-                _handleScroll(notification);
-                return true;
-              },
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      selectedMovies.length < 3
-                          ? "Pick at least 3 movies to continue"
-                          : "Great! You can continue",
-                      style: TextStyle(
-                        color: selectedMovies.length < 3
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.primary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+            // ✅ استبدال _buildHeader
+            HeaderWidget(
+              minimumSelection: minimumSelection,
+              currentSelection: selectedMovies.length,
+            ),
 
-                    /// ✅ Popular Movies
-                    const SectionTitle(title: "Popular Movies"),
-                    BlocBuilder<MovieBloc, MovieState>(
-                      builder: (context, state) {
-                        if (state is MovieCombinedState) {
-                          if (state.popularMovies != null &&
-                              state.popularMovies!.isNotEmpty) {
-                            return MovieGrid(
-                              movies: state.popularMovies!,
-                              itemLimit: 12,
-                              selectedMovies: selectedMovies,
-                              onMovieTap: toggleSelection,
-                            );
-                          } else if (state.isPopularLoading) {
-                            return const Center(child: CircularProgressIndicator());
-                          } else if (state.popularError != null) {
-                            return Text("Error: ${state.popularError}");
-                          }
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
+            Expanded(
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  _handleScroll(notification);
+                  return true;
+                },
+                child: SingleChildScrollView(
+                  padding:
+                  const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                  child: BlocBuilder<MovieBloc, MovieState>(
+                    builder: (context, state) {
+                      if (state is MovieCombinedState) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // ✅ استبدال _buildSelectionStatus
+                            SelectionStatusWidget(
+                              selectedCount: selectedMovies.length,
+                              minimumSelection: minimumSelection,
+                            ),
+                            const SizedBox(height: 24),
 
-                    const SizedBox(height: 24),
+                            if (state.popularMovies != null &&
+                                state.popularMovies!.isNotEmpty) ...[
+                              const SectionTitle(title: "Popular Movies"),
+                              const SizedBox(height: 8),
+                              MovieGrid(
+                                movies: state.popularMovies!,
+                                itemLimit: 15,
+                                selectedMovies: selectedMovies,
+                                onMovieTap: toggleMovieSelection,
+                              ),
+                              const SizedBox(height: 32),
+                            ] else if (state.isPopularLoading) ...[
+                              const SectionTitle(title: "Popular Movies"),
+                              const SizedBox(height: 16),
+                              // ✅ استبدال _buildLoadingGrid
+                              const LoadingGridWidget(),
+                              const SizedBox(height: 32),
+                            ],
 
-                    /// ✅ Top Rated Movies
-                    const SectionTitle(title: "Top Rated Watch All Time"),
-                    BlocBuilder<MovieBloc, MovieState>(
-                      builder: (context, state) {
-                        if (state is MovieCombinedState) {
-                          if (state.topRatedMovies != null &&
-                              state.topRatedMovies!.isNotEmpty) {
-                            return MovieGrid(
-                              movies: state.topRatedMovies!,
-                              itemLimit: 12,
-                              selectedMovies: selectedMovies,
-                              onMovieTap: toggleSelection,
-                            );
-                          } else if (state.isTopRatedLoading) {
-                            return const Center(child: CircularProgressIndicator());
-                          } else if (state.topRatedError != null) {
-                            return Text("Error: ${state.topRatedError}");
-                          }
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                  ],
+                            if (state.topRatedMovies != null &&
+                                state.topRatedMovies!.isNotEmpty) ...[
+                              const SectionTitle(
+                                  title: "Top Movies of All Time"),
+                              const SizedBox(height: 8),
+                              MovieGrid(
+                                movies: state.topRatedMovies!,
+                                itemLimit: 15,
+                                selectedMovies: selectedMovies,
+                                onMovieTap: toggleMovieSelection,
+                              ),
+                              const SizedBox(height: 32),
+                            ] else if (state.isTopRatedLoading &&
+                                topRatedLoaded) ...[
+                              const SectionTitle(
+                                  title: "Top Movies of All Time"),
+                              const SizedBox(height: 16),
+                              const LoadingGridWidget(),
+                              const SizedBox(height: 32),
+                            ],
+
+                            // ✅ استبدال _buildErrorWidget
+                            if (state.popularError != null)
+                              ErrorWidgetCustom(
+                                  message:
+                                  "Failed to load movies: ${state.popularError}"),
+
+                            if (state.topRatedError != null)
+                              ErrorWidgetCustom(
+                                  message:
+                                  "Failed to load popular movies: ${state.topRatedError}"),
+                          ],
+                        );
+                      }
+
+                      // Initial loading state
+                      return Column(
+                        children: [
+                          SelectionStatusWidget(
+                            selectedCount: selectedMovies.length,
+                            minimumSelection: minimumSelection,
+                          ),
+                          const SizedBox(height: 24),
+                          const SectionTitle(title: "Top Movies of All Time"),
+                          const SizedBox(height: 16),
+                          const LoadingGridWidget(),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
-
-            if (selectedMovies.length >= 3)
-              Positioned(
-                bottom: 16,
-                left: 16,
-                right: 16,
-                child: FilledButton(
-                  onPressed: () {
-                    print("Selected Movies: ${selectedMovies.length}");
-                  },
-                  child: const Text("Next"),
-                ),
-              ),
           ],
         ),
-      );
-    }
+      ),
+
+      // ✅ استبدال _buildBottomButton
+      bottomNavigationBar: BottomButtonWidget(
+        isEnabled: isMinimumMet,
+        selectedCount: selectedMovies.length,
+        minimumSelection: minimumSelection,
+        onContinue: () {
+          navigateAndFinish(context, GenreScreen());
+
+        },
+      ),
+    );
   }
+}

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pick_flix/ui/screens/genre_screen.dart';
-import 'package:pick_flix/ui/screens/movies_screen.dart';
-import 'package:pick_flix/ui/screens/splits_creen.dart';
 import 'package:pick_flix/view/api_service/ApiService.dart';
 import 'package:pick_flix/view/api_service/repository/movie_repository.dart';
 import 'package:pick_flix/view/cubit/movie/movie_bloc.dart';

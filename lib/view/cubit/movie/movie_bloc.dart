@@ -18,7 +18,6 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
         ? state as MovieCombinedState
         : MovieCombinedState();
 
-    // ✅ لو البيانات موجودة بالفعل، متعملش تحميل تاني
     if (currentState.popularMovies != null && currentState.popularMovies!.isNotEmpty) {
       return;
     }
@@ -26,7 +25,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     emit(currentState.copyWith(isPopularLoading: true));
 
     try {
-      final movies = await repository.fetchPopularMovies();
+      final movies = await repository.fetchTopRatedMovies();
       emit(
         currentState.copyWith(
           popularMovies: movies,
@@ -51,6 +50,9 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     final currentState = state is MovieCombinedState
         ? state as MovieCombinedState
         : MovieCombinedState();
+    if (currentState.topRatedMovies != null && currentState.topRatedMovies!.isNotEmpty) {
+      return;
+    }
     emit(currentState.copyWith(isTopRatedLoading: true));
     try {
       final movies = await repository.fetchTopRatedWatchAllTime();
