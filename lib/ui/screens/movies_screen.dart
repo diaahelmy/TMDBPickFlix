@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart'; // ✅ لازم عشان .w و .h و .sp
 import '../../view/cubit/movie/movie_bloc.dart';
 import '../../view/cubit/movie/movie_state.dart';
 import '../../view/data/movie_event.dart';
@@ -21,9 +22,9 @@ class FavoritesSelectionScreen extends StatelessWidget {
   void _handleScroll(BuildContext context, ScrollNotification notification) {
     final state = context.read<MovieBloc>().state as MovieCombinedState;
     if (notification.metrics.pixels >=
-            notification.metrics.maxScrollExtent - 200 &&
+        notification.metrics.maxScrollExtent - 200 &&
         !state.topRatedLoaded) {
-      context.read<MovieBloc>().add((FetchTopRatedTv()));
+      context.read<MovieBloc>().add(FetchTopRatedTv());
       context.read<MovieBloc>().add(MarkTopRatedLoaded());
     }
   }
@@ -53,7 +54,7 @@ class FavoritesSelectionScreen extends StatelessWidget {
                   return true;
                 },
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                  padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 100.h), // ✅ تم تحويل الأبعاد
                   child: BlocBuilder<MovieBloc, MovieState>(
                     builder: (context, state) {
                       if (state is! MovieCombinedState) {
@@ -67,13 +68,12 @@ class FavoritesSelectionScreen extends StatelessWidget {
                             selectedCount: state.selectedMovies.length,
                             minimumSelection: minimumSelection,
                           ),
-                          const SizedBox(height: 24),
+                          SizedBox(height: 24.h), // ✅ responsive spacing
 
-                          // ✅ Top Rated Movies
-
+                          // ✅ Top Rated Movies Section
                           if (state.topRatedMovies?.isNotEmpty ?? false) ...[
                             const SectionTitle(title: "Top Rated Movies"),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8.h),
                             MovieGrid(
                               movies: state.topRatedMovies!,
                               itemLimit: 12,
@@ -84,18 +84,21 @@ class FavoritesSelectionScreen extends StatelessWidget {
                                 );
                               },
                             ),
-                          ],
-                          if (state.isTopRatedLoading) ...[
+                            if (state.isTopRatedLoading) ...[
+                              const LoadingGridWidget(),
+                            ],
+                          ] else if (state.isTopRatedLoading) ...[
                             const LoadingGridWidget(),
-                          ],
-                          if (state.topRatedError != null) ...[
+                          ] else if (state.topRatedError != null) ...[
                             ErrorWidgetCustom(message: state.topRatedError!),
                           ],
 
-                          // ✅ TV Section
+                          SizedBox(height: 32.h),
+
+                          // ✅ Top Rated TV Section
                           if (state.topRatedTv?.isNotEmpty ?? false) ...[
                             const SectionTitle(title: "Top Rated TV"),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8.h),
                             MovieGrid(
                               movies: state.topRatedTv!,
                               itemLimit: 12,
@@ -106,7 +109,7 @@ class FavoritesSelectionScreen extends StatelessWidget {
                                 );
                               },
                             ),
-                            const SizedBox(height: 32),
+                            SizedBox(height: 32.h),
                           ],
                           if (state.isTopRatedTvLoading) ...[
                             const LoadingGridWidget(),
