@@ -5,7 +5,8 @@ import '../../../view/cubit/home/home_cubit.dart';
 import '../../../view/cubit/home/home_state.dart';
 import '../../component/movie_grid.dart';
 import '../../component/movie_section_widget.dart';
-import '../popular_screen.dart';
+import '../move_pages/popular_screen.dart';
+
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
