@@ -55,8 +55,13 @@ class HomeScreen extends StatelessWidget {
             MovieSectionWidget(
               title: 'Popular',
               onSeeAll: () {
-                navigateTo(context, PopularScreen());
-
+                navigateTo(
+                  context,
+                  BlocProvider.value(
+                    value: context.read<HomeCubit>(), // نفس الـ Cubit
+                    child: const PopularScreen(),
+                  ),
+                );
 
               },
               buildWhen: (state) =>
