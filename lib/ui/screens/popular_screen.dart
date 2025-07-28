@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pick_flix/ui/component/no_internet/compact_noInternet_widget.dart';
 import 'package:pick_flix/view/cubit/home/home_cubit.dart';
 import 'package:pick_flix/view/cubit/home/home_state.dart';
 import 'package:pick_flix/ui/component/loading_grid_widget.dart';
 import 'package:pick_flix/ui/component/movie_grid.dart';
+
+import '../component/no_internet/no_internet_widget.dart';
 
 class PopularScreen extends StatelessWidget {
   const PopularScreen({super.key});
@@ -30,38 +33,54 @@ class PopularScreen extends StatelessWidget {
         builder: (context, state) {
           final cubit = context.read<HomeCubit>();
 
-          // في حالة أول تحميل
-          if (state is! HomePopularLoading && state is! HomePopularLoaded) {
+          final alreadyLoaded = cubit.cachedPopularMovies.isNotEmpty;
+
+          if (!alreadyLoaded && state is! HomePopularLoading) {
             Future.microtask(() => cubit.fetchHomePopularMovies());
           }
 
           if (state is HomePopularLoading) {
             return const LoadingGridWidget();
-          } else if (state is HomePopularLoaded) {
+          }
+          else if (state is HomePopularLoaded || state is HomePopularError) {
             final isLoadingMore = cubit.isLoadingMore;
+            final loadMoreError = cubit.loadMoreError;
+            final movies = cubit.cachedPopularMovies;
 
             return NotificationListener<ScrollNotification>(
-              onNotification: (notif) =>
-                  _onScrollNotification(notif, context, state),
+              onNotification: (notif) => _onScrollNotification(notif, context, state),
               child: SingleChildScrollView(
                 child: Column(
                   children: [
                     MovieGrid(
-                      movies: state.movies,
+                      movies: movies,
                       crossAxisCount: 2,
                       showDetails: true,
                     ),
+
                     if (isLoadingMore)
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 16.0),
                         child: CircularProgressIndicator(),
                       ),
+
+                    if (loadMoreError != null)
+                    CompactNoInternetWidget(
+                      onRetry: () {
+                        context.read<HomeCubit>().fetchHomePopularMovies(loadMore: true);
+                      },
+                    ),
                   ],
                 ),
               ),
             );
-          } else if (state is HomePopularError) {
-            return Center(child: Text('Error: ${state.message}'));
+          }
+          else if (state is HomePopularError) {
+            return NoInternetWidget(
+              onRetry: () {
+                context.read<HomeCubit>().fetchHomePopularMovies();
+              },
+            );
           } else {
             return const Center(child: Text('No data.'));
           }

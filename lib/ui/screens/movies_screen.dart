@@ -6,6 +6,7 @@ import '../../view/cubit/movie/movie_bloc.dart';
 import '../../view/cubit/movie/movie_state.dart';
 import '../../view/data/movie_event.dart';
 import '../component/movie_grid.dart';
+import '../component/no_internet/no_internet_widget.dart';
 import '../component/section_title.dart';
 import '../component/header_widget.dart';
 import '../component/selection_status_widget.dart';
@@ -24,8 +25,9 @@ class FavoritesSelectionScreen extends StatelessWidget {
     final movieState = context.read<MovieBloc>().state;
     if (movieState is MovieCombinedState) {
       if (notification.metrics.pixels >=
-          notification.metrics.maxScrollExtent - 200 &&
-          !movieState.topRatedLoaded) { // افترض أن topRatedLoaded تشير إلى تحميل قائمة المسلسلات
+              notification.metrics.maxScrollExtent - 200 &&
+          !movieState.topRatedLoaded) {
+        // افترض أن topRatedLoaded تشير إلى تحميل قائمة المسلسلات
         context.read<MovieBloc>().add(FetchTopRatedTv());
         context.read<MovieBloc>().add(MarkTopRatedLoaded());
       }
@@ -67,12 +69,14 @@ class FavoritesSelectionScreen extends StatelessWidget {
 
                       // عرض مؤشر تحميل رئيسي إذا كانت كلتا القائمتين قيد التحميل أو لم يتم تحميلهما بعد
                       // وليس هناك أخطاء
-                      if (state.isTopRatedLoading && state.isTopRatedTvLoading &&
-                          state.topRatedMovies == null && state.topRatedTv == null &&
-                          state.topRatedError == null && state.topRatedTvError == null ) {
+                      if (state.isTopRatedLoading &&
+                          state.isTopRatedTvLoading &&
+                          state.topRatedMovies == null &&
+                          state.topRatedTv == null &&
+                          state.topRatedError == null &&
+                          state.topRatedTvError == null) {
                         return const LoadingGridWidget();
                       }
-
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,58 +87,67 @@ class FavoritesSelectionScreen extends StatelessWidget {
                           ),
                           SizedBox(height: 24.h),
 
-                          // ✅ Top Rated Movies Section
-                          if (state.topRatedMovies?.isNotEmpty ?? false) ...[
-                            const SectionTitle(title: "Top Rated Movies"),
-                            SizedBox(height: 8.h),
-                            MovieGrid(
-                              movies: state.topRatedMovies!,
-                              itemLimit: 12,
-                              selectedMovies: state.selectedMovies,
-                              onMovieTap: (movie) {
-                                context.read<MovieBloc>().add(
-                                  ToggleMovieSelection(movie),
-                                );
+                          // ✅ عرض No Internet مرة واحدة لو الاتنين فاضيين وفيهم Error
+                          if ((state.topRatedMovies == null || state.topRatedMovies!.isEmpty) &&
+                              (state.topRatedTv == null || state.topRatedTv!.isEmpty) &&
+                              (state.topRatedError != null || state.topRatedTvError != null)) ...[
+                            NoInternetWidget(
+                              onRetry: () {
+                                final bloc = context.read<MovieBloc>();
+                                bloc.add(FetchTopRatedMovies());
+                                bloc.add(FetchTopRatedTv());
                               },
                             ),
-                          ] else if (state.isTopRatedLoading && state.topRatedMovies == null) ...[
-                            // عرض التحميل فقط إذا كانت الأفلام قيد التحميل ولم يتم تحميلها بعد
-                            const SectionTitle(title: "Top Rated Movies"), // اختياري: عرض العنوان أثناء التحميل
-                            SizedBox(height: 8.h),
-                            const LoadingGridWidget(),
-                          ] else if (state.topRatedError != null && state.topRatedMovies == null) ...[
-                            // عرض الخطأ فقط إذا كان هناك خطأ ولم يتم تحميل الأفلام
-                            ErrorWidgetCustom(message: state.topRatedError!),
+                          ] else ...[
+                            // ✅ Top Rated Movies Section
+                            if (state.topRatedMovies?.isNotEmpty ?? false) ...[
+                              const SectionTitle(title: "Top Rated Movies"),
+                              SizedBox(height: 8.h),
+                              MovieGrid(
+                                movies: state.topRatedMovies!,
+                                itemLimit: 12,
+                                selectedMovies: state.selectedMovies,
+                                onMovieTap: (movie) {
+                                  context.read<MovieBloc>().add(
+                                    ToggleMovieSelection(movie),
+                                  );
+                                },
+                              ),
+                            ] else if (state.isTopRatedLoading &&
+                                state.topRatedMovies == null) ...[
+                              const SectionTitle(title: "Top Rated Movies"),
+                              SizedBox(height: 8.h),
+                              const LoadingGridWidget(),
+                            ],
+
+                            SizedBox(height: 32.h),
+
+                            // ✅ Top Rated TV Section
+                            if (state.topRatedTv?.isNotEmpty ?? false) ...[
+                              const SectionTitle(title: "Top Rated TV"),
+                              SizedBox(height: 8.h),
+                              MovieGrid(
+                                movies: state.topRatedTv!,
+                                itemLimit: 12,
+                                selectedMovies: state.selectedMovies,
+                                onMovieTap: (movie) {
+                                  context.read<MovieBloc>().add(
+                                    ToggleMovieSelection(movie),
+                                  );
+                                },
+                              ),
+                            ] else if (state.isTopRatedTvLoading &&
+                                state.topRatedTv == null) ...[
+                              const SectionTitle(title: "Top Rated TV"),
+                              SizedBox(height: 8.h),
+                              const LoadingGridWidget(),
+                            ],
                           ],
 
                           SizedBox(height: 32.h),
-
-                          // ✅ Top Rated TV Section
-                          if (state.topRatedTv?.isNotEmpty ?? false) ...[
-                            const SectionTitle(title: "Top Rated TV"),
-                            SizedBox(height: 8.h),
-                            MovieGrid(
-                              movies: state.topRatedTv!,
-                              itemLimit: 12,
-                              selectedMovies: state.selectedMovies,
-                              onMovieTap: (movie) {
-                                context.read<MovieBloc>().add(
-                                  ToggleMovieSelection(movie),
-                                );
-                              },
-                            ),
-                          ] else if (state.isTopRatedTvLoading && state.topRatedTv == null) ...[
-                            // عرض التحميل فقط إذا كانت المسلسلات قيد التحميل ولم يتم تحميلها بعد
-                            const SectionTitle(title: "Top Rated TV"), // اختياري: عرض العنوان أثناء التحميل
-                            SizedBox(height: 8.h),
-                            const LoadingGridWidget(),
-                          ] else if (state.topRatedTvError != null && state.topRatedTv == null) ...[
-                            // عرض الخطأ فقط إذا كان هناك خطأ ولم يتم تحميل المسلسلات
-                            ErrorWidgetCustom(message: state.topRatedTvError!),
-                          ],
-                          SizedBox(height: 32.h), // مسافة إضافية في الأسفل إذا لزم الأمر
                         ],
                       );
+
                     },
                   ),
                 ),

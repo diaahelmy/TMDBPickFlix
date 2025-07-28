@@ -5,10 +5,12 @@ import '../../../models/movie_model.dart';
 
 class HomeCubit extends Cubit<HomeState> {
   final MovieRepository repository;
-
+  HomePopularError? _loadMoreError;
   int _popularCurrentPage = 1;
   List<Movie> _popularMovies = [];
   bool isLoadingMore = false; // ✅ أضف دي
+  HomePopularError? get loadMoreError => _loadMoreError;
+  List<Movie> get cachedPopularMovies => _popularMovies;
 
   HomeCubit(this.repository) : super(HomeInitial());
 
@@ -25,15 +27,19 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> fetchHomePopularMovies({bool loadMore = false}) async {
     try {
       if (!loadMore) {
-        if (isLoadingMore) return; // ✅ منع التكرار
+        if (isLoadingMore) return;
 
         _popularCurrentPage = 1;
+        _loadMoreError = null; // Reset error عند أول تحميل
+
         emit(HomePopularLoading());
       } else {
         if (isLoadingMore) return;
         isLoadingMore = true;
         _popularCurrentPage++;
+
         emit(
+
           HomePopularLoaded(List.of(_popularMovies)),
         ); // لتحديث الـ UI بعلامة التحميل تحت
       }
@@ -47,12 +53,20 @@ class HomeCubit extends Cubit<HomeState> {
       } else {
         _popularMovies = newMovies;
       }
+      _loadMoreError = null;
+
 
       emit(HomePopularLoaded(List.of(_popularMovies)));
     } catch (e) {
-      emit(HomePopularError(e.toString()));
+      if (loadMore) {
+        _popularCurrentPage--; // ✅ ارجع الصفحة
+        _loadMoreError = HomePopularError(e.toString()); // ✅ خزن الخطأ
+        emit(HomePopularLoaded(List.of(_popularMovies))); // ✅ رجع مع البيانات
+      }else{
+        emit(HomePopularError(e.toString()));
+      }
     } finally {
-      isLoadingMore = false; // ✅ ضروري جدًا تحطها هنا سواء حصل خطأ أو لا
+      isLoadingMore = false;
     }
   }
 
