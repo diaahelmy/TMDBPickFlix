@@ -9,25 +9,22 @@ class SearchErrorWidget extends StatelessWidget {
 
   const SearchErrorWidget({super.key, required this.state});
 
-  String _getErrorMessage(String message) {
-    final lower = message.toLowerCase();
-    if (lower.contains('failed host lookup')) {
-      return 'No internet connection. Please check your network.';
-    } else if (lower.contains('timeout')) {
-      return 'Request timed out. Please try again.';
-    } else {
-      return 'Something went wrong. Please try again.';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: NoInternetWidget(
-        subtitle: _getErrorMessage(state.message),
-        onRetry: () {
-          context.read<SearchCubit>().retrySearch();
-        },
+    return SafeArea(
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: NoInternetWidget(
+              onRetry: () {
+                context.read<SearchCubit>().retrySearch();
+              },
+            ),
+          ),
+        ),
       ),
     );
   }
