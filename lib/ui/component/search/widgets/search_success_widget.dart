@@ -42,34 +42,29 @@ class _SuccessStateState extends State<SearchSuccessWidget> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
-            'Found ${widget.state.movies.length} results for "${widget.state.query}"',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: MovieGrid(
-                movies: widget.state.movies,
-                showDetails: true,
+    return SafeArea(
+      child: ListView(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(16),
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Text(
+              'Found ${widget.state.movies.length} results for "${widget.state.query}"',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
-        ),
-      ],
+          MovieGrid(
+            movies: widget.state.movies,
+            showDetails: true,
+          ),
+        ],
+      ),
     );
   }
+
 }

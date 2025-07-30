@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pick_flix/ui/component/movie_grid.dart';
 import '../../../view/cubit/search/search_cubit.dart';
 import '../../../view/cubit/search/search_state.dart';
-
 import '../../component/search/widgets/loading_more_indicator.dart';
 import '../../component/search/widgets/search_bar_widget.dart';
 import '../../component/search/widgets/search_body.dart';
@@ -15,7 +13,7 @@ class SearchScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => SearchCubit(
-        movieRepository: context.read(), // Assuming MovieRepository is provided above
+        movieRepository: context.read(),
       ),
       child: const _SearchView(),
     );
@@ -30,6 +28,7 @@ class _SearchView extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false, // تم تغييره لحل مشكلة الـ overflow
       appBar: AppBar(
         elevation: 0,
         backgroundColor: theme.scaffoldBackgroundColor,
@@ -40,23 +39,29 @@ class _SearchView extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(80),
-          child: SearchBarWidget(),
-        ),
+        toolbarHeight: kToolbarHeight, // ارتفاع ثابت للـ AppBar
       ),
-      body: BlocBuilder<SearchCubit, SearchState>(
-        builder: (context, state) {
-          return Column(
-            children: [
-              Expanded(child: SearchBody(state: state)),
-              if (state is SearchSuccess && state.isLoadingMore)
-                const LoadingMoreIndicator(),
-            ],
-          );
-        },
+      body: Column(
+        children: [
+          // شريط البحث في الأعلى
+          const SearchBarWidget(),
+
+          // باقي المحتوى
+          Expanded(
+            child: BlocBuilder<SearchCubit, SearchState>(
+              builder: (context, state) {
+                return Column(
+                  children: [
+                    Expanded(child: SearchBody(state: state)),
+                    if (state is SearchSuccess && state.isLoadingMore)
+                      const LoadingMoreIndicator(),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 }
-
