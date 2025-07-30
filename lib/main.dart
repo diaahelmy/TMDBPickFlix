@@ -2,31 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pick_flix/ui/screens/genre_screen.dart';
+import 'package:pick_flix/ui/screens/navbarmenu/home_screen.dart';
+import 'package:pick_flix/ui/screens/navbarmenu/search_screen.dart';
 import 'package:pick_flix/view/api_service/ApiService.dart';
 import 'package:pick_flix/view/api_service/repository/movie_repository.dart';
 import 'package:pick_flix/view/cubit/home/home_cubit.dart';
 import 'package:pick_flix/view/cubit/main/main_bloc.dart';
 import 'package:pick_flix/view/cubit/movie/movie_bloc.dart';
+import 'package:pick_flix/view/cubit/search/search_cubit.dart';
 import 'package:pick_flix/view/cubit/split_screen/cubit_split_screen.dart';
 import 'package:pick_flix/view/data/genre_event.dart';
 import 'package:pick_flix/view/data/movie_event.dart';
 import 'package:pick_flix/view/themes/appthemes.dart';
 
 void main() {
-  final apiService = ApiService();
-  final repository = MovieRepository(apiService);
-
-  runApp(MyApp(repository: repository));
+  runApp(
+    RepositoryProvider<MovieRepository>(
+      create: (_) => MovieRepository(ApiService()),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  final MovieRepository repository;
-
-  const MyApp({super.key, required this.repository});
+  const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {  
-    return ScreenUtilInit( //  أضف ScreenUtilInit
+  Widget build(BuildContext context) {
+    final repository = RepositoryProvider.of<MovieRepository>(context);
+
+    return ScreenUtilInit(
       designSize: const Size(360, 690),
       minTextAdapt: true,
       splitScreenMode: true,
@@ -45,9 +50,15 @@ class MyApp extends StatelessWidget {
               create: (_) => MainCubit(),
             ),
             BlocProvider(
-              create: (context) => HomeCubit(repository)..fetchHomeUpComingMovies()..fetchHomePopularMovies()..fetchHomeTopRatedMovies(),
+              create: (context) => HomeCubit(repository)
+                ..fetchHomeUpComingMovies()
+                ..fetchHomePopularMovies()
+                ..fetchHomeTopRatedMovies(),
             ),
-
+            BlocProvider(
+              create: (context) => SearchCubit(movieRepository: repository)
+                ..searchMovies(''),
+            ),
           ],
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
@@ -55,7 +66,7 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: ThemeMode.system,
-            home: const GenreScreen(),
+            home: const SearchScreen(),
           ),
         );
       },

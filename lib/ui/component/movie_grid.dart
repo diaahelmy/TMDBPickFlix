@@ -1,8 +1,5 @@
 import 'dart:ui';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import '../../models/movie_model.dart';
 
 class MovieGrid extends StatelessWidget {
@@ -12,6 +9,7 @@ class MovieGrid extends StatelessWidget {
   final int? itemLimit;
   final int crossAxisCount;
   final bool showDetails;
+  final bool showDescription;
 
   const MovieGrid({
     super.key,
@@ -19,8 +17,9 @@ class MovieGrid extends StatelessWidget {
     this.selectedMovies,
     this.onMovieTap,
     this.itemLimit,
-    this.crossAxisCount=3,
-    this.showDetails =false,
+    this.crossAxisCount = 3,
+    this.showDetails = false,
+    this.showDescription = false,
   });
 
   @override
@@ -28,19 +27,36 @@ class MovieGrid extends StatelessWidget {
     final displayed = itemLimit != null
         ? movies.take(itemLimit!).toList()
         : movies;
+
     final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // حساب عدد الأعمدة ديناميكيًا
+    int dynamicCrossAxisCount = crossAxisCount;
+    if (crossAxisCount == 3) {
+      dynamicCrossAxisCount = screenWidth > 1200
+          ? 6
+          : screenWidth > 900
+          ? 5
+          : screenWidth > 600
+          ? 4
+          : 3;
+    }
+
+    // حساب النسبة الطولية للبطاقة
+    double aspectRatio = screenWidth < 400 ? 0.5 : 0.6;
 
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: displayed.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
+        crossAxisCount: dynamicCrossAxisCount,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio: 0.6,
+        childAspectRatio: aspectRatio,
       ),
-      itemBuilder: (c, i) {
+      itemBuilder: (context, i) {
         final movie = displayed[i];
         final isSel = selectedMovies?.contains(movie) ?? false;
 
@@ -76,7 +92,7 @@ class MovieGrid extends StatelessWidget {
                         children: [
                           Image.network(
                             'https://image.tmdb.org/t/p/w500${movie.posterPath}',
-                            fit: BoxFit.cover,
+                            fit: BoxFit.contain, // أفضل للصور
                             width: double.infinity,
                             height: double.infinity,
                             errorBuilder: (context, error, stackTrace) {
@@ -155,7 +171,7 @@ class MovieGrid extends StatelessWidget {
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
-                        height: 1.3, // Professional line height
+                        height: 1.3,
                         color: isSel
                             ? theme.colorScheme.primary
                             : theme.colorScheme.onSurface,
@@ -166,7 +182,7 @@ class MovieGrid extends StatelessWidget {
                     ),
                   ),
 
-                  if (showDetails)
+                  if (showDescription)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(
@@ -180,26 +196,22 @@ class MovieGrid extends StatelessWidget {
                         textAlign: TextAlign.center,
                       ),
                     ),
+
                   if (showDetails)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.star, size: 14, color: Colors.amber),
-                          SizedBox(width: 4),
+                          const Icon(Icons.star, size: 14, color: Colors.amber),
+                          const SizedBox(width: 4),
                           Text(
                             movie.voteAverage.toStringAsFixed(1),
                             style: theme.textTheme.labelMedium,
                           ),
-                          // يمكنك لاحقًا إضافة مدة الفيلم هنا:
-                          // SizedBox(width: 8),
-                          // Icon(Icons.schedule, size: 14, color: Colors.grey),
-                          // Text("120 min", style: theme.textTheme.labelMedium),
                         ],
                       ),
                     ),
-
                 ],
               ),
             ),

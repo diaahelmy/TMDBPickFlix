@@ -23,4 +23,10 @@ class MovieRepository {
   Future<List<Movie>> fetchPopularMovies({int page = 1}) {
     return apiService.fetchMovies("movie/popular", page: page);
   }
+  Future<List<Movie>> searchMovies(String query, {int page = 1}) {
+    return apiService.searchMovies(query, page: page);
+  }
+
+
+
 }

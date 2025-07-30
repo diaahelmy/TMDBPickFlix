@@ -69,6 +69,7 @@ class PopularScreen extends StatelessWidget {
                       movies: movies,
                       crossAxisCount: 2,
                       showDetails: true,
+                      showDescription: true,
                     ),
 
 

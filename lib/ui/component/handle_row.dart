@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 
-import 'card.dart';
+
 import 'error_widget.dart';
+import 'loading_grid_widget.dart';
+import 'movie_grid.dart';
 
 class _MovieListRow extends StatelessWidget {
   final List movies;
@@ -20,7 +22,7 @@ class _MovieListRow extends StatelessWidget {
           return Container(
             width: 160,
             margin: const EdgeInsets.only(right: 12),
-            child: MovieCard(movie: movies[index]),
+            child: MovieGrid( movies: movies[index],),
           );
         },
       ),
@@ -38,7 +40,7 @@ class _LoadingRow extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: 8,
-        itemBuilder: (_, __) => const LoadingCard(),
+        itemBuilder: (_, __) => const LoadingGridWidget(),
       ),
     );
   }
