@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pick_flix/ui/component/navigation_helper.dart';
-import '../../../view/cubit/home/home_cubit.dart';
-import '../../../view/cubit/home/home_state.dart';
+import '../../../view/cubit/home/home_genre_recommendation_cubit.dart';
+import '../../../view/cubit/home/home_movies_recommendation_cubit.dart';
+import '../../../view/cubit/home/home_popular_state.dart';
+import '../../../view/cubit/home/home_toprated_cubit.dart';
+import '../../../view/cubit/home/home_upcoming_cubit.dart';
+import '../../../view/cubit/home/popular_movies_cubit.dart';
 import '../../../view/helper/SelectedPreferencesHelper.dart';
 import '../../component/movie_grid.dart';
 import '../../component/movie_section_widget.dart';
@@ -10,12 +14,15 @@ import '../move_pages/popular_screen.dart';
 
 
 class HomeScreen extends StatelessWidget {
+
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
+    final recommendationCubit = context.watch<
+        HomeMoviesRecommendationCubit>();
+    final title = recommendationCubit.lastRecommendationSourceTitle;
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
@@ -52,73 +59,85 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
-              const SizedBox(height: 16),
-            MovieSectionWidget(
-              title: context.watch<HomeCubit>().lastRecommendationSourceTitle != null
-                  ? 'Recommended (from "${context.watch<HomeCubit>().lastRecommendationSourceTitle}")'
+            const SizedBox(height: 16),
+            MovieSectionWidget<HomeMoviesRecommendationCubit, HomeMoviesRecommendationState>(
+              title: title != null
+                  ? 'Recommended (from "$title")'
                   : 'Recommended',
-              onSeeAll: () {
-              },
+              onSeeAll: () {},
               buildWhen: (state) =>
-              state is HomeRecommendationsByMoviesLoading ||
-                  state is HomeRecommendationsByMoviesLoaded ||
-                  state is HomeRecommendationsByMoviesError,
+              state is HomeSelectedRecommendationLoading ||
+                  state is HomeSelectedRecommendationLoaded ||
+                  state is HomeSelectedRecommendationError,
+
+              /// ✅ البراميترز المطلوبة:
+              isLoading: (state) => state is HomeSelectedRecommendationLoading,
+              isLoaded: (state) => state is HomeSelectedRecommendationLoaded,
+              isError: (state) => state is HomeSelectedRecommendationError,
+              getMovies: (state) => (state as HomeSelectedRecommendationLoaded).movies,
+
               movieBuilder: (movies) =>
-                  MovieGrid(movies: movies.take(6).toList()), // ✅ هنا التعديل الوحيد
+                  MovieGrid(movies: movies.take(6).toList()),
+
               onRetry: () async {
-                final movieIds = await SelectedPreferencesHelper.getSelectedMovies();
-                context.read<HomeCubit>().fetchRecommendationsBySelectedMovies(movieIds);
+                final selectedItems = await SelectedPreferencesHelper.getSelectedItems();
+                context.read<HomeGeneralRecommendationCubit>().fetchRecommendationsBySelectedMovies(selectedItems);
               },
             ),
 
 
             const SizedBox(height: 16),
-            MovieSectionWidget(
+            MovieSectionWidget<HomePopularCubit, HomePopularState>(
               title: 'Popular',
               onSeeAll: () {
-                navigateTo(
-                  context,
-                  BlocProvider.value(
-                    value: context.read<HomeCubit>(), // نفس الـ Cubit
-                    child: const PopularScreen(),
-                  ),
-                );
-
+                navigateTo(context, PopularScreen());
               },
               buildWhen: (state) =>
               state is HomePopularLoading ||
                   state is HomePopularLoaded ||
                   state is HomePopularError,
+              isLoading: (state) => state is HomePopularLoading,
+              isLoaded: (state) => state is HomePopularLoaded,
+              isError: (state) => state is HomePopularError,
+              getMovies: (state) => (state as HomePopularLoaded).movies,
               movieBuilder: (movies) =>
                   MovieGrid(movies: movies.take(6).toList()),
               onRetry: () =>
-                  context.read<HomeCubit>().fetchHomePopularMovies(),
+                  context.read<HomePopularCubit>().fetchPopularMovies(),
             ),
             const SizedBox(height: 24),
-            MovieSectionWidget(
+            MovieSectionWidget<HomeUpcomingCubit, HomeUpcomingState>(
               title: 'Upcoming',
               onSeeAll: () {},
               buildWhen: (state) =>
               state is HomeUpcomingLoading ||
                   state is HomeUpcomingLoaded ||
                   state is HomeUpcomingError,
+              isLoading: (state) => state is HomeUpcomingLoading,
+              isLoaded: (state) => state is HomeUpcomingLoaded,
+              isError: (state) => state is HomeUpcomingError,
+              getMovies: (state) => (state as HomeUpcomingLoaded).movies,
               movieBuilder: (movies) =>
                   MovieGrid(movies: movies.take(6).toList()),
               onRetry: () =>
-                  context.read<HomeCubit>().fetchHomeUpComingMovies(),
+                  context.read<HomeUpcomingCubit>().fetchUpcomingMovies(),
             ),
             const SizedBox(height: 24),
-            MovieSectionWidget(
+            MovieSectionWidget<HomeTopRatedCubit, HomeTopRatedState>(
               title: 'Top Rated',
               onSeeAll: () {},
               buildWhen: (state) =>
-              state is HomeTopRateLoading ||
-                  state is HomeTopRateLoaded ||
-                  state is HomeTopRateError,
+              state is HomeTopRatedLoading ||
+                  state is HomeTopRatedLoaded ||
+                  state is HomeTopRatedError,
+              isLoading: (state) => state is HomeTopRatedLoading,
+              isLoaded: (state) => state is HomeTopRatedLoaded,
+              isError: (state) => state is HomeTopRatedError,
+              getMovies: (state) => (state as HomeTopRatedLoaded).movies,
               movieBuilder: (movies) =>
                   MovieGrid(movies: movies.take(6).toList()),
               onRetry: () =>
-                  context.read<HomeCubit>().fetchHomeTopRatedMovies(),
+                  context.read<HomeTopRatedCubit>().fetchTopRatedMovies(),
             ),
             const SizedBox(height: 32),
           ],

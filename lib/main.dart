@@ -4,11 +4,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pick_flix/ui/screens/genre_screen.dart';
 import 'package:pick_flix/ui/screens/main_screen.dart';
 import 'package:pick_flix/ui/screens/movies_screen.dart';
-import 'package:pick_flix/ui/screens/navbarmenu/home_screen.dart';
-import 'package:pick_flix/ui/screens/navbarmenu/search_screen.dart';
 import 'package:pick_flix/view/api_service/ApiService.dart';
 import 'package:pick_flix/view/api_service/repository/movie_repository.dart';
 import 'package:pick_flix/view/cubit/home/home_cubit.dart';
+import 'package:pick_flix/view/cubit/home/home_movies_recommendation_cubit.dart';
+import 'package:pick_flix/view/cubit/home/home_toprated_cubit.dart';
+import 'package:pick_flix/view/cubit/home/home_upcoming_cubit.dart';
+import 'package:pick_flix/view/cubit/home/popular_movies_cubit.dart';
 import 'package:pick_flix/view/cubit/main/main_bloc.dart';
 import 'package:pick_flix/view/cubit/movie/movie_bloc.dart';
 import 'package:pick_flix/view/cubit/search/search_cubit.dart';
@@ -21,10 +23,10 @@ import 'package:pick_flix/view/themes/appthemes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Cache.init(); // تأكد من تهيئة SharedPreferences
+  await Cache.init();
 
   final selectedGenres = await SelectedPreferencesHelper.getSelectedGenres();
-  final selectedMovies = await SelectedPreferencesHelper.getSelectedMovies();
+  final selectedMovies = await SelectedPreferencesHelper.getSelectedItems();
 
   Widget initialScreen;
 
@@ -39,15 +41,20 @@ void main() async {
   runApp(
     RepositoryProvider<MovieRepository>(
       create: (_) => MovieRepository(ApiService()),
-      child: MyApp(initialScreen: initialScreen, selectedMovieIds: selectedMovies,),
+      child: MyApp(initialScreen: initialScreen, selectedItems: selectedMovies),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
   final Widget initialScreen;
-  final List<int> selectedMovieIds;
-  const MyApp({super.key,required this.initialScreen,required this.selectedMovieIds});
+  final List<SelectedMovieWithSource> selectedItems;
+
+  const MyApp({
+    super.key,
+    required this.initialScreen,
+    required this.selectedItems,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -68,19 +75,33 @@ class MyApp extends StatelessWidget {
             BlocProvider(
               create: (_) => CubitSplitScreenBloc()..add(LoadGenres()),
             ),
+            BlocProvider(create: (_) => MainCubit()),
+            BlocProvider(create: (context) => HomeCubit()),
             BlocProvider(
-              create: (_) => MainCubit(),
+              create: (context) =>
+                  HomeMoviesRecommendationCubit(repository)
+                    ..fetchRecommendations(selectedItems),
+            ),
+
+            // BlocProvider(
+            //   create: (context) => HomeGenreRecommendationCubit(repository),
+            // ),
+            BlocProvider(
+              create: (context) =>
+                  HomePopularCubit(repository)..fetchPopularMovies(),
             ),
             BlocProvider(
-              create: (context) => HomeCubit(repository)
-                ..fetchHomeUpComingMovies()
-                ..fetchHomePopularMovies()
-                ..fetchHomeTopRatedMovies()
-              ..fetchRecommendationsBySelectedMovies(selectedMovieIds),
+              create: (context) =>
+                  HomeUpcomingCubit(repository)..fetchUpcomingMovies(),
             ),
             BlocProvider(
-              create: (context) => SearchCubit(movieRepository: repository)
-                ..searchMovies(''),
+              create: (context) =>
+                  HomeTopRatedCubit(repository)..fetchTopRatedMovies(),
+            ),
+
+            BlocProvider(
+              create: (context) =>
+                  SearchCubit(movieRepository: repository)..searchMovies(''),
             ),
           ],
           child: MaterialApp(
@@ -89,7 +110,7 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: ThemeMode.system,
-            home:  initialScreen,
+            home: initialScreen,
           ),
         );
       },

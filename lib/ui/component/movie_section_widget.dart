@@ -1,16 +1,21 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../models/movie_model.dart';
-import '../../view/cubit/home/home_cubit.dart';
-import '../../view/cubit/home/home_state.dart';
 import 'loading_grid_widget.dart';
 
-class MovieSectionWidget extends StatelessWidget {
+class MovieSectionWidget<C extends Cubit<S>, S> extends StatelessWidget {
   final String title;
   final VoidCallback onSeeAll;
-  final bool Function(HomeState) buildWhen;
+  final bool Function(S) buildWhen;
   final Widget Function(List<Movie>) movieBuilder;
   final VoidCallback onRetry;
+
+  /// New:
+  final bool Function(S) isLoading;
+  final bool Function(S) isLoaded;
+  final bool Function(S) isError;
+  final List<Movie> Function(S) getMovies;
 
   const MovieSectionWidget({
     super.key,
@@ -19,6 +24,12 @@ class MovieSectionWidget extends StatelessWidget {
     required this.buildWhen,
     required this.movieBuilder,
     required this.onRetry,
+
+    // NEW required fields:
+    required this.isLoading,
+    required this.isLoaded,
+    required this.isError,
+    required this.getMovies,
   });
 
   @override
@@ -27,7 +38,7 @@ class MovieSectionWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title & See All
+        // Title + See All
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Row(
@@ -40,9 +51,9 @@ class MovieSectionWidget extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.onSurface,
                   ),
-                  maxLines: 2, // ✅ يسمح بسطرين
-                  overflow: TextOverflow.ellipsis, // ✅ لو أطول من سطرين يقطعه بنقاط
-                  softWrap: true, // ✅ يسمح بكسر السطر
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: true,
                 ),
               ),
               TextButton(
@@ -60,31 +71,20 @@ class MovieSectionWidget extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        // BlocBuilder for section content
-        BlocBuilder<HomeCubit, HomeState>(
-          buildWhen: (prev, current) => buildWhen(current),
+        BlocBuilder<C, S>(
+          buildWhen: (previous, current) => buildWhen(current),
           builder: (context, state) {
-            if (state is HomePopularLoading ||
-                state is HomeUpcomingLoading ||
-                state is HomeTopRateLoading ||
-                state is HomeRecommendationsByMoviesLoading) {
+            if (isLoading(state)) {
               return const LoadingGridWidget();
-            } else if (state is HomePopularLoaded ||
-                state is HomeUpcomingLoaded ||
-                state is HomeTopRateLoaded ||
-                state is HomeRecommendationsByMoviesLoaded) {
-              final movies = (state as dynamic).movies as List<Movie>;
+            } else if (isLoaded(state)) {
+              final movies = getMovies(state);
               return movieBuilder(movies);
-            } else if (state is HomePopularError ||
-                state is HomeUpcomingError ||
-                state is HomeTopRateError ||
-                state is HomeRecommendationsByMoviesError) {
+            } else if (isError(state)) {
               return _buildError(context);
             }
             return const SizedBox.shrink();
           },
         ),
-
       ],
     );
   }

@@ -38,8 +38,16 @@ class MovieRepository {
   Future<List<Movie>> fetchTrendingTv({int page = 1}) {
     return apiService.fetchMovies("trending/tv/week", page: page);
   }
-  Future<List<Movie>> fetchSimilarMovies({  required int movieId,int page = 1}) {
-    return apiService.fetchSimilarMovies(movieId, page: page);
+  Future<List<Movie>> fetchSimilarMovies({
+    required int id,
+    required String source, // "movie" or "tv"
+    int page = 1,
+  }) {
+    return apiService.fetchSimilar(
+      id: id,
+      source: source,
+      page: page,
+    );
   }
   Future<List<Movie>> fetchMoviesByGenres({ required int genreIds,int page = 1}) {
     return apiService.fetchMoviesByGenres(genreIds, page: page);
@@ -54,7 +62,7 @@ class MovieRepository {
 
 
   Future<List<Movie>> searchMovies(String query, {int page = 1}) {
-    return apiService.searchMovies(query, page: page);
+    return apiService.searchMulti(query, page: page);
   }
 
 

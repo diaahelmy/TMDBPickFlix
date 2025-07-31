@@ -1,8 +1,26 @@
 import 'cache.dart';
 
+class SelectedMovieWithSource {
+  final int id;
+  final String source; // "movie" أو "tv"
+
+  SelectedMovieWithSource({required this.id, required this.source});
+
+  @override
+  String toString() => '$source|$id';
+
+  factory SelectedMovieWithSource.fromString(String str) {
+    final parts = str.split('|');
+    return SelectedMovieWithSource(
+      source: parts[0],
+      id: int.parse(parts[1]),
+    );
+  }
+}
+
 class SelectedPreferencesHelper {
   static const _selectedGenresKey = 'selected_genres';
-  static const _selectedMoviesKey = 'selected_movies';
+  static const _selectedItemsKey = 'selected_items'; // أفلام ومسلسلات
 
   // حفظ التصنيفات المختارة
   static Future<void> saveSelectedGenres(List<int> genreIds) async {
@@ -18,17 +36,17 @@ class SelectedPreferencesHelper {
     return ids?.map(int.parse).toList() ?? [];
   }
 
-  // حفظ الأفلام المختارة
-  static Future<void> saveSelectedMovies(List<int> movieIds) async {
+  // حفظ الأفلام/المسلسلات المختارة
+  static Future<void> saveSelectedItems(List<SelectedMovieWithSource> items) async {
     await Cache.setStringList(
-      key: _selectedMoviesKey,
-      value: movieIds.map((e) => e.toString()).toList(),
+      key: _selectedItemsKey,
+      value: items.map((e) => e.toString()).toList(), // ex: movie|123
     );
   }
 
-  // استرجاع الأفلام المختارة
-  static List<int> getSelectedMovies() {
-    final ids = Cache.getStringList(_selectedMoviesKey);
-    return ids?.map(int.parse).toList() ?? [];
+  // استرجاع الأفلام/المسلسلات المختارة
+  static Future<List<SelectedMovieWithSource>> getSelectedItems() async {
+    final rawList = Cache.getStringList(_selectedItemsKey) ?? [];
+    return rawList.map((str) => SelectedMovieWithSource.fromString(str)).toList();
   }
 }

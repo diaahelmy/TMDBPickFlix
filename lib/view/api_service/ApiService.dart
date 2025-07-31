@@ -22,21 +22,32 @@ class ApiService {
     }
   }
 
-  Future<List<Movie>> searchMovies(String query, {int page = 1}) async {
+  Future<List<Movie>> searchMulti(String query, {int page = 1}) async {
     final response = await http.get(
-      Uri.parse('$_baseUrl/search/movie?api_key=$_apiKey&language=en-US&query=$query&page=$page'),
+      Uri.parse('$_baseUrl/search/multi?api_key=$_apiKey&language=en-US&query=$query&page=$page'),
     );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      List movies = data['results'];
-      return movies.map((json) => Movie.fromJson(json)).toList();
+      List results = data['results'];
+
+      // فلترة عشان تاخد بس الأفلام والمسلسلات (مش الأشخاص)
+      final filtered = results.where((json) =>
+      json['media_type'] == 'movie' || json['media_type'] == 'tv'
+      ).toList();
+
+      return filtered.map((json) => Movie.fromJson(json)).toList();
     } else {
-      throw Exception('Failed to search movies');
+      throw Exception('Failed to search multi');
     }
   }
-  Future<List<Movie>> fetchSimilarMovies(int movieId, {int page = 1}) async {
-    final url = '$_baseUrl/movie/$movieId/similar?api_key=$_apiKey&language=en-US&page=$page';
+
+  Future<List<Movie>> fetchSimilar({
+    required int id,
+    required String source, // "movie" or "tv"
+    int page = 1,
+  }) async {
+    final url = '$_baseUrl/$source/$id/similar?api_key=$_apiKey&language=en-US&page=$page';
 
     final response = await http.get(Uri.parse(url));
 
@@ -45,7 +56,7 @@ class ApiService {
       List movies = data['results'];
       return movies.map((json) => Movie.fromJson(json)).toList();
     } else {
-      throw Exception('Failed to load similar movies');
+      throw Exception('Failed to load similar $source');
     }
   }
 

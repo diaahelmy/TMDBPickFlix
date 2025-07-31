@@ -24,8 +24,12 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
       } else {
         updatedSet.add(event.movie);
       }
-      final selectedIds = updatedSet.map((movie) => movie.id).toList();
-      await SelectedPreferencesHelper.saveSelectedMovies(selectedIds);
+      final selectedItems = updatedSet.map((movie) {
+        final source = movie.title != null ? 'movie' : 'tv'; // مؤقتًا بناء على وجود title
+        return SelectedMovieWithSource(id: movie.id, source: source);
+      }).toList();
+
+      await SelectedPreferencesHelper.saveSelectedItems(selectedItems);
 
       emit(currentState.copyWith(selectedMovies: updatedSet));
     });
