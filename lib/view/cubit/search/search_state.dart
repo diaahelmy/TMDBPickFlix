@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
-import '../../../models/movie_model.dart';
+import 'package:pick_flix/models/search_result.dart';
+
+import '../../../ui/component/search/widgets/search_result_grid.dart';
 
 abstract class SearchState extends Equatable {
   const SearchState();
@@ -13,14 +15,14 @@ class SearchInitial extends SearchState {}
 class SearchLoading extends SearchState {}
 
 class SearchSuccess extends SearchState {
-  final List<Movie> movies;
+  final List<SearchResult> results;
   final String query;
   final int currentPage;
   final bool hasReachedMax;
   final bool isLoadingMore;
 
   const SearchSuccess({
-    required this.movies,
+    required this.results,
     required this.query,
     this.currentPage = 1,
     this.hasReachedMax = false,
@@ -28,14 +30,14 @@ class SearchSuccess extends SearchState {
   });
 
   SearchSuccess copyWith({
-    List<Movie>? movies,
+    List<SearchResult>? results,
     String? query,
     int? currentPage,
     bool? hasReachedMax,
     bool? isLoadingMore,
   }) {
     return SearchSuccess(
-      movies: movies ?? this.movies,
+      results: results ?? this.results,
       query: query ?? this.query,
       currentPage: currentPage ?? this.currentPage,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
@@ -44,7 +46,7 @@ class SearchSuccess extends SearchState {
   }
 
   @override
-  List<Object?> get props => [movies, query, currentPage, hasReachedMax, isLoadingMore];
+  List<Object?> get props => [results, query, currentPage, hasReachedMax, isLoadingMore];
 }
 
 class SearchEmpty extends SearchState {

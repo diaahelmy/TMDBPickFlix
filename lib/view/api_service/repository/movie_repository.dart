@@ -1,4 +1,7 @@
+import 'package:pick_flix/models/search_result.dart';
+
 import '../../../models/movie_model.dart';
+import '../../../ui/component/search/widgets/search_result_grid.dart';
 import '../ApiService.dart';
 
 
@@ -61,7 +64,7 @@ class MovieRepository {
 
 
 
-  Future<List<Movie>> searchMovies(String query, {int page = 1}) {
+  Future<List<SearchResult>> searchMovies(String query, {int page = 1}) {
     return apiService.searchMulti(query, page: page);
   }
 

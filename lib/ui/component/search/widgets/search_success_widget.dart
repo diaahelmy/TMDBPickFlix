@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pick_flix/ui/component/search/widgets/search_result_grid.dart';
 import '../../../../view/cubit/search/search_cubit.dart';
 import '../../../../view/cubit/search/search_state.dart';
 import '../../movie_grid.dart';
@@ -51,20 +52,22 @@ class _SuccessStateState extends State<SearchSuccessWidget> {
           Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: Text(
-              'Found ${widget.state.movies.length} results for "${widget.state.query}"',
+              'Found ${widget.state.results.length} results for "${widget.state.query}"',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w500,
               ),
             ),
           ),
-          MovieGrid(
-            movies: widget.state.movies,
+          SearchResultGrid(
+            results: widget.state.results,
+
             showDetails: true,
+            showMediaType: true,
+            crossAxisCount: 3,
           ),
         ],
       ),
     );
   }
-
 }

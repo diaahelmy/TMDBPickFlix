@@ -77,7 +77,7 @@ class SearchCubit extends Cubit<SearchState> {
       } else {
         print('SearchCubit: Movies found, emitting SearchSuccess'); // Debug
         emit(SearchSuccess(
-          movies: movies,
+          results: movies,
           query: query,
           currentPage: 1,
           hasReachedMax: movies.length < 20, // TMDB returns 20 results per page
@@ -108,10 +108,10 @@ class SearchCubit extends Cubit<SearchState> {
         page: currentState.currentPage + 1,
       );
 
-      final allMovies = [...currentState.movies, ...newMovies];
+      final allMovies = [...currentState.results, ...newMovies];
 
       emit(SearchSuccess(
-        movies: allMovies,
+        results: allMovies,
         query: currentState.query,
         currentPage: currentState.currentPage + 1,
         hasReachedMax: newMovies.length < 20,
@@ -148,6 +148,7 @@ class SearchCubit extends Cubit<SearchState> {
     } else if (error.toString().contains('timeout')) {
       return 'Request timed out. Please try again.';
     } else {
+      print('SearchErrorWidget$error');
       return 'Something went wrong. Please try again.';
     }
   }

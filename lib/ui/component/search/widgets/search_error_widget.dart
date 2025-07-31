@@ -12,6 +12,8 @@ class SearchErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('SearchErrorWidget: ${state.message}');
+
     return SafeArea(
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
