@@ -11,13 +11,12 @@ class PopularScreen extends StatelessWidget {
   const PopularScreen({super.key});
 
   bool _onScrollNotification(
-    ScrollNotification notification,
-    BuildContext context,
-    HomeState state,
-  ) {
+      ScrollNotification notification,
+      BuildContext context,
+      HomeState state,
+      ) {
     if (notification.metrics.pixels >=
-            notification.metrics.maxScrollExtent - 200 &&
-        state is HomePopularLoaded) {
+        notification.metrics.maxScrollExtent - 200) {
       context.read<HomeCubit>().fetchHomePopularMovies(loadMore: true);
     }
     return false;
@@ -28,36 +27,35 @@ class PopularScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Popular Movies')),
       body: BlocBuilder<HomeCubit, HomeState>(
-        buildWhen: (prev, curr) =>
-            curr is HomePopularLoading ||
-            curr is HomePopularLoaded ||
-            curr is HomePopularError,
         builder: (context, state) {
+          debugPrint("📦 Popular state: $state");
           final cubit = context.read<HomeCubit>();
           final movies = cubit.cachedPopularMovies;
-          final alreadyLoaded = cubit.cachedPopularMovies.isNotEmpty;
+          final alreadyLoaded = movies.isNotEmpty;
 
-          // لو لسه مافيش داتا و مش ب تحميل، نبدأ نحمّل الداتا
-          if (!alreadyLoaded && state is! HomePopularLoading&&
+          // تحميل مبدئي للداتا لو مش متخزنة ومفيش تحميل أو خطأ
+          if (!alreadyLoaded &&
+              state is! HomePopularLoading &&
               state is! HomePopularError) {
             Future.microtask(() => cubit.fetchHomePopularMovies());
           }
 
-          if (state is HomePopularLoading) {
+          if (state is HomePopularLoading && !alreadyLoaded) {
             return const LoadingGridWidget();
           }
-          // ✅ لو حصل Error ومفيش أي داتا متخزنة  نعرض NoInternetWidget
-          if (state is HomePopularError && movies.isEmpty) {
+
+          if (state is HomePopularError && !alreadyLoaded) {
             return NoInternetWidget(
               onRetry: () {
                 context.read<HomeCubit>().fetchHomePopularMovies();
               },
             );
           }
-          else if (state is HomePopularLoaded || state is HomePopularError) {
+
+          // طالما في أفلام متخزنة، اعرضها بغض النظر عن نوع الحالة
+          if (alreadyLoaded) {
             final isLoadingMore = cubit.isLoadingMore;
             final loadMoreError = cubit.loadMoreError;
-            final movies = cubit.cachedPopularMovies;
 
             return NotificationListener<ScrollNotification>(
               onNotification: (notif) =>
@@ -71,17 +69,11 @@ class PopularScreen extends StatelessWidget {
                       showDetails: true,
                       showDescription: true,
                     ),
-
-
-                    //  (pagination)
                     if (isLoadingMore)
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 16.0),
                         child: CircularProgressIndicator(),
                       ),
-
-
-                    // no internet
                     if (loadMoreError != null)
                       CompactNoInternetWidget(
                         onRetry: () {
@@ -94,15 +86,10 @@ class PopularScreen extends StatelessWidget {
                 ),
               ),
             );
-          } else if (state is HomePopularError) {
-            return NoInternetWidget(
-              onRetry: () {
-                context.read<HomeCubit>().fetchHomePopularMovies();
-              },
-            );
-          } else {
-            return const Center(child: Text('No data.'));
           }
+
+          // fallback نهائي
+          return const Center(child: Text('No data.'));
         },
       ),
     );

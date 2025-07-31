@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../models/movie_model.dart';
 import '../../api_service/repository/movie_repository.dart';
 import '../../data/movie_event.dart';
+import '../../helper/SelectedPreferencesHelper.dart';
 import 'movie_state.dart';
 
 class MovieBloc extends Bloc<MovieEvent, MovieState> {
@@ -14,7 +15,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     on<FetchTopRatedTv>(_onFetchTopRatedTv);
     on<FetchTopRatedMovies>(_onFetchTopRatedWatchAllTime);
 
-    on<ToggleMovieSelection>((event, emit) {
+    on<ToggleMovieSelection>((event, emit)async {
       final currentState = state as MovieCombinedState;
       final updatedSet = Set<Movie>.from(currentState.selectedMovies);
 
@@ -23,6 +24,8 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
       } else {
         updatedSet.add(event.movie);
       }
+      final selectedIds = updatedSet.map((movie) => movie.id).toList();
+      await SelectedPreferencesHelper.saveSelectedMovies(selectedIds);
 
       emit(currentState.copyWith(selectedMovies: updatedSet));
     });

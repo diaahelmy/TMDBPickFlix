@@ -8,6 +8,8 @@ class FetchTopRatedMovies extends MovieEvent {}
 
 class FetchTopRatedTv extends MovieEvent {}
 
+class FetchRecommendationsBySelectedMovies extends MovieEvent {}
+
 class ToggleMovieSelection extends MovieEvent {
   final Movie movie;
   ToggleMovieSelection(this.movie);

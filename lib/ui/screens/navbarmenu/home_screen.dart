@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pick_flix/ui/component/navigation_helper.dart';
 import '../../../view/cubit/home/home_cubit.dart';
 import '../../../view/cubit/home/home_state.dart';
+import '../../../view/helper/SelectedPreferencesHelper.dart';
 import '../../component/movie_grid.dart';
 import '../../component/movie_section_widget.dart';
 import '../move_pages/popular_screen.dart';
@@ -51,6 +52,26 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
+              const SizedBox(height: 16),
+            MovieSectionWidget(
+              title: context.watch<HomeCubit>().lastRecommendationSourceTitle != null
+                  ? 'Recommended (from "${context.watch<HomeCubit>().lastRecommendationSourceTitle}")'
+                  : 'Recommended',
+              onSeeAll: () {
+              },
+              buildWhen: (state) =>
+              state is HomeRecommendationsByMoviesLoading ||
+                  state is HomeRecommendationsByMoviesLoaded ||
+                  state is HomeRecommendationsByMoviesError,
+              movieBuilder: (movies) =>
+                  MovieGrid(movies: movies.take(6).toList()), // ✅ هنا التعديل الوحيد
+              onRetry: () async {
+                final movieIds = await SelectedPreferencesHelper.getSelectedMovies();
+                context.read<HomeCubit>().fetchRecommendationsBySelectedMovies(movieIds);
+              },
+            ),
+
+
             const SizedBox(height: 16),
             MovieSectionWidget(
               title: 'Popular',

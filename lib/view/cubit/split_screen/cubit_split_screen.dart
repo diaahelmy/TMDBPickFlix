@@ -2,6 +2,7 @@ import 'package:pick_flix/view/cubit/split_screen/states_split_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../models/Genrel.dart';
 import '../../data/genre_event.dart';
+import '../../helper/SelectedPreferencesHelper.dart';
 
 class CubitSplitScreenBloc extends Bloc<GenreEvent, StateSplitScreen> {
   CubitSplitScreenBloc()
@@ -15,7 +16,7 @@ class CubitSplitScreenBloc extends Bloc<GenreEvent, StateSplitScreen> {
       );
     });
 
-    on<ToggleGenreSelection>((event, emit) {
+    on<ToggleGenreSelection>((event, emit)async  {
       final updatedMovies = state.movieGenres.map((genre) {
         return genre.id == event.genreId
             ? Genre(
@@ -35,6 +36,11 @@ class CubitSplitScreenBloc extends Bloc<GenreEvent, StateSplitScreen> {
               )
             : genre;
       }).toList();
+      final selectedIds = [
+        ...updatedMovies.where((g) => g.isSelected).map((g) => g.id),
+        ...updatedTv.where((g) => g.isSelected).map((g) => g.id),
+      ];
+      await SelectedPreferencesHelper.saveSelectedGenres(selectedIds.toSet().toList());
 
       emit(state.copyWith(movieGenres: updatedMovies, tvGenres: updatedTv));
     });

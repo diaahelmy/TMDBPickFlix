@@ -35,6 +35,47 @@ class ApiService {
       throw Exception('Failed to search movies');
     }
   }
+  Future<List<Movie>> fetchSimilarMovies(int movieId, {int page = 1}) async {
+    final url = '$_baseUrl/movie/$movieId/similar?api_key=$_apiKey&language=en-US&page=$page';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      List movies = data['results'];
+      return movies.map((json) => Movie.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load similar movies');
+    }
+  }
+
+  Future<List<Movie>> fetchMoviesByGenres(int genreId, {int page = 1}) async {
+    final url = '$_baseUrl/discover/movie?api_key=$_apiKey&language=en-US&with_genres=$genreId&page=$page';
+
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      List movies = data['results'];
+      return movies.map((json) => Movie.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load movies by genres');
+    }
+  }
+
+  Future<Movie> getMovieDetails(int movieId) async {
+    final url = '$_baseUrl/movie/$movieId?api_key=$_apiKey&language=en-US';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return Movie.fromJson(data);
+    } else {
+      throw Exception('Failed to load movie details');
+    }
+  }
+
+
 
   Future<List<Movie>> getMoviesByRating({double minRating = 7, int page = 1}) async {
     final response = await http.get(

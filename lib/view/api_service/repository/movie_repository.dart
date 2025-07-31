@@ -23,6 +23,36 @@ class MovieRepository {
   Future<List<Movie>> fetchPopularMovies({int page = 1}) {
     return apiService.fetchMovies("movie/popular", page: page);
   }
+  Future<List<Movie>> fetchPopularTv({int page = 1}) {
+    return apiService.fetchMovies("tv/popular", page: page);
+  }
+  Future<List<Movie>> fetchNowPlayingMovies({int page = 1}) {
+    return apiService.fetchMovies("movie/now_playing", page: page);
+  }
+  Future<List<Movie>> fetchNowPlayingTv({int page = 1}) {
+    return apiService.fetchMovies("tv/on_the_air", page: page);
+  }
+  Future<List<Movie>> fetchTrendingMovies({int page = 1}) {
+    return apiService.fetchMovies("trending/movie/week", page: page);
+  }
+  Future<List<Movie>> fetchTrendingTv({int page = 1}) {
+    return apiService.fetchMovies("trending/tv/week", page: page);
+  }
+  Future<List<Movie>> fetchSimilarMovies({  required int movieId,int page = 1}) {
+    return apiService.fetchSimilarMovies(movieId, page: page);
+  }
+  Future<List<Movie>> fetchMoviesByGenres({ required int genreIds,int page = 1}) {
+    return apiService.fetchMoviesByGenres(genreIds, page: page);
+  }
+  Future<List<Movie>> getMoviesByRating({double minRating = 7, int page = 1}) {
+    return apiService.getMoviesByRating(minRating: minRating, page: page);
+  }
+  Future<Movie> getMovieDetails(int movieId) {
+    return apiService.getMovieDetails(movieId);
+  }
+
+
+
   Future<List<Movie>> searchMovies(String query, {int page = 1}) {
     return apiService.searchMovies(query, page: page);
   }

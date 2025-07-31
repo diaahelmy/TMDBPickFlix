@@ -33,11 +33,16 @@ class MovieSectionWidget extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
+              Flexible(
+                child: Text(
+                  title,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  maxLines: 2, // ✅ يسمح بسطرين
+                  overflow: TextOverflow.ellipsis, // ✅ لو أطول من سطرين يقطعه بنقاط
+                  softWrap: true, // ✅ يسمح بكسر السطر
                 ),
               ),
               TextButton(
@@ -61,21 +66,25 @@ class MovieSectionWidget extends StatelessWidget {
           builder: (context, state) {
             if (state is HomePopularLoading ||
                 state is HomeUpcomingLoading ||
-                state is HomeTopRateLoading) {
-              return const LoadingGridWidget(); // already defined by you
+                state is HomeTopRateLoading ||
+                state is HomeRecommendationsByMoviesLoading) {
+              return const LoadingGridWidget();
             } else if (state is HomePopularLoaded ||
                 state is HomeUpcomingLoaded ||
-                state is HomeTopRateLoaded) {
+                state is HomeTopRateLoaded ||
+                state is HomeRecommendationsByMoviesLoaded) {
               final movies = (state as dynamic).movies as List<Movie>;
               return movieBuilder(movies);
             } else if (state is HomePopularError ||
                 state is HomeUpcomingError ||
-                state is HomeTopRateError) {
+                state is HomeTopRateError ||
+                state is HomeRecommendationsByMoviesError) {
               return _buildError(context);
             }
             return const SizedBox.shrink();
           },
         ),
+
       ],
     );
   }
