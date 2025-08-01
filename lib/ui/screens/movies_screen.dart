@@ -5,7 +5,7 @@ import 'package:pick_flix/ui/screens/main_screen.dart';
 import '../../view/cubit/movie/movie_bloc.dart';
 import '../../view/cubit/movie/movie_state.dart';
 import '../../view/data/movie_event.dart';
-import '../component/movie_grid.dart';
+import '../component/grid_item/movie_grid.dart';
 import '../component/no_internet/no_internet_widget.dart';
 import '../component/section_title.dart';
 import '../component/header_widget.dart';
@@ -104,10 +104,10 @@ class FavoritesSelectionScreen extends StatelessWidget {
                               const SectionTitle(title: "Top Rated Movies"),
                               SizedBox(height: 8.h),
                               MovieGrid(
-                                movies: state.topRatedMovies!,
+                                items: state.topRatedMovies!,
                                 itemLimit: 12,
-                                selectedMovies: state.selectedMovies,
-                                onMovieTap: (movie) {
+                                selectedItems: state.selectedMovies,
+                                onItemTap: (movie) {
                                   context.read<MovieBloc>().add(
                                     ToggleMovieSelection(movie),
                                   );
@@ -127,10 +127,10 @@ class FavoritesSelectionScreen extends StatelessWidget {
                               const SectionTitle(title: "Top Rated TV"),
                               SizedBox(height: 8.h),
                               MovieGrid(
-                                movies: state.topRatedTv!,
+                                items: state.topRatedTv!,
                                 itemLimit: 12,
-                                selectedMovies: state.selectedMovies,
-                                onMovieTap: (movie) {
+                                selectedItems: state.selectedMovies,
+                                onItemTap: (movie) {
                                   context.read<MovieBloc>().add(
                                     ToggleMovieSelection(movie),
                                   );

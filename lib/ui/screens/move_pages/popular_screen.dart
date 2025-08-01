@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pick_flix/ui/component/no_internet/compact_noInternet_widget.dart';
-import 'package:pick_flix/view/cubit/home/home_cubit.dart';
-import 'package:pick_flix/view/cubit/home/home_state.dart';
 import 'package:pick_flix/ui/component/loading_grid_widget.dart';
-import 'package:pick_flix/ui/component/movie_grid.dart';
+import 'package:pick_flix/ui/component/grid_item/movie_grid.dart';
 import '../../../view/cubit/home/home_popular_state.dart';
 import '../../../view/cubit/home/popular_movies_cubit.dart';
 import '../../component/no_internet/no_internet_widget.dart';
@@ -19,7 +17,10 @@ class PopularScreen extends StatelessWidget {
       ) {
     if (notification.metrics.pixels >=
         notification.metrics.maxScrollExtent - 200) {
-      context.read<HomePopularCubit>().fetchPopularMovies(loadMore: true);
+      final cubit = context.read<HomePopularCubit>();
+      if (!cubit.isLoadingMore && state is! HomePopularError) {
+        cubit.fetchPopularMovies(loadMore: true);
+      }
     }
     return false;
   }
@@ -35,7 +36,6 @@ class PopularScreen extends StatelessWidget {
           final movies = cubit.cachedPopularMovies;
           final alreadyLoaded = movies.isNotEmpty;
 
-          // تحميل مبدئي للداتا لو مش متخزنة ومفيش تحميل أو خطأ
           if (!alreadyLoaded &&
               state is! HomePopularLoading &&
               state is! HomePopularError) {
@@ -49,14 +49,14 @@ class PopularScreen extends StatelessWidget {
           if (state is HomePopularError && !alreadyLoaded) {
             return NoInternetWidget(
               onRetry: () {
-                context.read<HomePopularCubit>().fetchPopularMovies();
+                cubit.fetchPopularMovies();
               },
             );
           }
 
-          // طالما في أفلام متخزنة، اعرضها بغض النظر عن نوع الحالة
           if (alreadyLoaded) {
             final isLoadingMore = cubit.isLoadingMore;
+            final isErrorLoadingMore = cubit.hasErrorLoadingMore;
 
             return NotificationListener<ScrollNotification>(
               onNotification: (notif) =>
@@ -65,31 +65,30 @@ class PopularScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     MovieGrid(
-                      movies: movies,
+                      items: movies,
                       crossAxisCount: 2,
                       showDetails: true,
                       showDescription: true,
                     ),
-                    if (isLoadingMore)
+                    if (isLoadingMore && !isErrorLoadingMore)
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 16.0),
                         child: CircularProgressIndicator(),
                       ),
-                    CompactNoInternetWidget(
-                      onRetry: () {
-                        context.read<HomePopularCubit>().fetchPopularMovies(
-                          loadMore: true,
-                        );
-                      },
-                    ),
+                    if (isErrorLoadingMore)
+                      CompactNoInternetWidget(
+                        onRetry: () {
+                          cubit.fetchPopularMovies(loadMore: true);
+                        },
+                      ),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
             );
           }
 
-          // fallback نهائي
-          return const Center(child: Text('No data.'));
+          return const Center(child: Text('No data available'));
         },
       ),
     );

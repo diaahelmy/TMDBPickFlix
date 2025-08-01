@@ -1,7 +1,6 @@
 import 'package:pick_flix/models/search_result.dart';
 
 import '../../../models/movie_model.dart';
-import '../../../ui/component/search/widgets/search_result_grid.dart';
 import '../ApiService.dart';
 
 

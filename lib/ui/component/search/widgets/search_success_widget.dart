@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pick_flix/ui/component/search/widgets/search_result_grid.dart';
 import '../../../../view/cubit/search/search_cubit.dart';
 import '../../../../view/cubit/search/search_state.dart';
-import '../../movie_grid.dart';
 
 class SearchSuccessWidget extends StatefulWidget {
   final SearchSuccess state;
@@ -60,12 +59,11 @@ class _SuccessStateState extends State<SearchSuccessWidget> {
             ),
           ),
           SearchResultGrid(
-            results: widget.state.results,
-
+            items: widget.state.results,
             showDetails: true,
             showMediaType: true,
             crossAxisCount: 3,
-          ),
+          )
         ],
       ),
     );

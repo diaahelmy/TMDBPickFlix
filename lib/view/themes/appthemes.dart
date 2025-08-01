@@ -21,24 +21,54 @@ class AppTheme {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: colorScheme.surface,
 
-      // Professional AppBar
+      // Beautiful Light AppBar with gradient and glass effect
       appBarTheme: AppBarTheme(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white.withOpacity(0.95),
         foregroundColor: colorScheme.onSurface,
         elevation: 0,
         centerTitle: true,
+        scrolledUnderElevation: 4,
+        shadowColor: _primaryColor.withOpacity(0.1),
+        surfaceTintColor: _primaryColor.withOpacity(0.05),
         titleTextStyle: TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.w600,
+          fontSize: 24,
+          fontWeight: FontWeight.w700,
           color: colorScheme.onSurface,
+          letterSpacing: -0.5,
+          shadows: [
+            Shadow(
+              offset: const Offset(0, 1),
+              blurRadius: 2,
+              color: Colors.black.withOpacity(0.1),
+            ),
+          ],
         ),
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        iconTheme: IconThemeData(
+          color: colorScheme.onSurface,
+          size: 24,
+        ),
+        actionsIconTheme: IconThemeData(
+          color: colorScheme.onSurface,
+          size: 24,
+        ),
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
+        toolbarHeight: 72, // Taller for better presence
+        titleSpacing: 0,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(16),
+          ),
+        ),
       ),
 
       // Enhanced Chip Theme for movie genres/filters
       chipTheme: ChipThemeData(
         backgroundColor: colorScheme.surfaceContainer,
-        selectedColor: _accentColor.withValues(alpha: 0.9),
+        selectedColor: _accentColor.withOpacity(0.9),
         disabledColor: colorScheme.surfaceContainerHighest,
         side: BorderSide.none,
         showCheckmark: false,
@@ -49,7 +79,7 @@ class AppTheme {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         elevation: 2,
-        selectedShadowColor: _accentColor.withValues(alpha: 0.3),
+        selectedShadowColor: _accentColor.withOpacity(0.3),
       ),
 
       // Professional Typography
@@ -115,7 +145,7 @@ class AppTheme {
           backgroundColor: _accentColor,
           foregroundColor: Colors.white,
           elevation: 3,
-          shadowColor: _accentColor.withValues(alpha: 0.3),
+          shadowColor: _accentColor.withOpacity(0.3),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -142,7 +172,7 @@ class AppTheme {
       // Card Theme for movie cards
       cardTheme: CardThemeData(
         elevation: 4,
-        shadowColor: Colors.black.withValues(alpha: 0.1),
+        shadowColor: Colors.black.withOpacity(0.1),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -175,18 +205,52 @@ class AppTheme {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: _darkSurface,
 
-      // Dark AppBar
+      // Stunning Dark AppBar with premium glass effect
       appBarTheme: AppBarTheme(
-        backgroundColor: Colors.transparent,
+        backgroundColor: _darkCard.withOpacity(0.95),
         foregroundColor: colorScheme.onSurface,
         elevation: 0,
         centerTitle: true,
+        scrolledUnderElevation: 8,
+        shadowColor: _accentColor.withOpacity(0.2),
+        surfaceTintColor: _primaryColor.withOpacity(0.1),
         titleTextStyle: TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.w600,
+          fontSize: 24,
+          fontWeight: FontWeight.w700,
           color: colorScheme.onSurface,
+          letterSpacing: -0.5,
+          shadows: [
+            Shadow(
+              offset: const Offset(0, 1),
+              blurRadius: 3,
+              color: _accentColor.withOpacity(0.3),
+            ),
+          ],
         ),
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        iconTheme: IconThemeData(
+          color: colorScheme.onSurface,
+          size: 24,
+        ),
+        actionsIconTheme: IconThemeData(
+          color: colorScheme.onSurface,
+          size: 24,
+        ),
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
+        toolbarHeight: 72, // Consistent with light theme
+        titleSpacing: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(16),
+          ),
+          side: BorderSide(
+            color: _accentColor.withOpacity(0.1),
+            width: 0.5,
+          ),
+        ),
       ),
 
       // Dark Chip Theme
@@ -194,7 +258,7 @@ class AppTheme {
         backgroundColor: _darkCard,
         selectedColor: _accentColor,
         disabledColor: colorScheme.surfaceContainerHighest,
-        side: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
+        side: BorderSide(color: Colors.grey.withOpacity(0.2)),
         showCheckmark: false,
         labelStyle: TextStyle(
           fontWeight: FontWeight.w500,
@@ -203,7 +267,7 @@ class AppTheme {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         elevation: 2,
-        selectedShadowColor: _accentColor.withValues(alpha: 0.3),
+        selectedShadowColor: _accentColor.withOpacity(0.3),
       ),
 
       // Dark Typography
@@ -269,7 +333,7 @@ class AppTheme {
           backgroundColor: _accentColor,
           foregroundColor: Colors.white,
           elevation: 3,
-          shadowColor: _accentColor.withValues(alpha: 0.3),
+          shadowColor: _accentColor.withOpacity(0.3),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -296,7 +360,7 @@ class AppTheme {
       // Dark Card Theme
       cardTheme: CardThemeData(
         elevation: 4,
-        shadowColor: Colors.black.withValues(alpha: 0.3),
+        shadowColor: Colors.black.withOpacity(0.3),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -313,4 +377,105 @@ class AppTheme {
       ),
     );
   }
+}
+
+// Custom AppBar widget for even more advanced styling
+class CustomMovieAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String title;
+  final List<Widget>? actions;
+  final Widget? leading;
+  final bool showBackButton;
+
+  const CustomMovieAppBar({
+    super.key,
+    required this.title,
+    this.actions,
+    this.leading,
+    this.showBackButton = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [
+            const Color(0xFF161B22),
+            const Color(0xFF0D1117),
+          ]
+              : [
+            Colors.white,
+            theme.colorScheme.primary.withOpacity(0.02),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? const Color(0xFFFF6B35).withOpacity(0.1)
+                : Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        borderRadius: const BorderRadius.vertical(
+          bottom: Radius.circular(20),
+        ),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              if (showBackButton && Navigator.of(context).canPop())
+                Container(
+                  margin: const EdgeInsets.only(right: 16),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainer.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.arrow_back_ios_new),
+                    iconSize: 20,
+                  ),
+                )
+              else if (leading != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: leading!,
+                ),
+
+              Expanded(
+                child: Text(
+                  title,
+                  style: theme.appBarTheme.titleTextStyle?.copyWith(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+              if (actions != null)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: actions!,
+                )
+              else
+                const SizedBox(width: 48), // Balance the back button
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(80);
 }

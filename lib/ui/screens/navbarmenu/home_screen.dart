@@ -8,7 +8,7 @@ import '../../../view/cubit/home/home_toprated_cubit.dart';
 import '../../../view/cubit/home/home_upcoming_cubit.dart';
 import '../../../view/cubit/home/popular_movies_cubit.dart';
 import '../../../view/helper/SelectedPreferencesHelper.dart';
-import '../../component/movie_grid.dart';
+import '../../component/grid_item/movie_grid.dart';
 import '../../component/movie_section_widget.dart';
 import '../move_pages/popular_screen.dart';
 
@@ -77,7 +77,7 @@ class HomeScreen extends StatelessWidget {
               getMovies: (state) => (state as HomeSelectedRecommendationLoaded).movies,
 
               movieBuilder: (movies) =>
-                  MovieGrid(movies: movies.take(6).toList()),
+                  MovieGrid(items: movies.take(6).toList(),showDetails: true,),
 
               onRetry: () async {
                 final selectedItems = await SelectedPreferencesHelper.getSelectedItems();
@@ -101,7 +101,7 @@ class HomeScreen extends StatelessWidget {
               isError: (state) => state is HomePopularError,
               getMovies: (state) => (state as HomePopularLoaded).movies,
               movieBuilder: (movies) =>
-                  MovieGrid(movies: movies.take(6).toList()),
+                  MovieGrid(items: movies.take(6).toList(),showDetails: true,),
               onRetry: () =>
                   context.read<HomePopularCubit>().fetchPopularMovies(),
             ),
@@ -118,7 +118,7 @@ class HomeScreen extends StatelessWidget {
               isError: (state) => state is HomeUpcomingError,
               getMovies: (state) => (state as HomeUpcomingLoaded).movies,
               movieBuilder: (movies) =>
-                  MovieGrid(movies: movies.take(6).toList()),
+                  MovieGrid(items: movies.take(6).toList(),showDetails: true,),
               onRetry: () =>
                   context.read<HomeUpcomingCubit>().fetchUpcomingMovies(),
             ),
@@ -135,7 +135,7 @@ class HomeScreen extends StatelessWidget {
               isError: (state) => state is HomeTopRatedError,
               getMovies: (state) => (state as HomeTopRatedLoaded).movies,
               movieBuilder: (movies) =>
-                  MovieGrid(movies: movies.take(6).toList()),
+                  MovieGrid(items: movies.take(6).toList(),showDetails: true,),
               onRetry: () =>
                   context.read<HomeTopRatedCubit>().fetchTopRatedMovies(),
             ),
