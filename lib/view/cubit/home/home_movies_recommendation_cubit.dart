@@ -23,7 +23,6 @@ class HomeSelectedRecommendationError extends HomeMoviesRecommendationState {
   HomeSelectedRecommendationError(this.message);
 }
 
-
 class HomeMoviesRecommendationCubit extends Cubit<HomeMoviesRecommendationState> {
   final MovieRepository repository;
 
@@ -50,7 +49,9 @@ class HomeMoviesRecommendationCubit extends Cubit<HomeMoviesRecommendationState>
 
       allRecommendations.addAll(recommendations);
 
-      final sourceMovie = await repository.getMovieDetails(sourceId);
+      final sourceMovie = await repository.getMovieDetails(
+        source: sourceType, id: sourceId,
+      );
       lastRecommendationSourceTitle = sourceMovie.title;
     } catch (e) {
       debugPrint('❌ Error fetching recommendations for $sourceType $sourceId: $e');

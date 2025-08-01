@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../view/api_service/repository/movie_repository.dart';
 import '../../../../view/cubit/search/search_state.dart';
 import '../../loading_grid_widget.dart';
 import 'search_initial_widget.dart';
@@ -21,7 +23,7 @@ class SearchBody extends StatelessWidget {
         child: LoadingGridWidget(),
       );
     } else if (state is SearchSuccess) {
-      return SearchSuccessWidget(state: state as SearchSuccess);
+      return SearchSuccessWidget(state: state as SearchSuccess, repository: context.read<MovieRepository>(),);
     } else if (state is SearchEmpty) {
       return SearchEmptyWidget(state: state as SearchEmpty);
     } else if (state is SearchError) {

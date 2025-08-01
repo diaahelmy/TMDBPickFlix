@@ -4,8 +4,7 @@ class SearchHistoryHelper {
   static const String _key = 'search_history';
   static const int _maxHistoryItems = 10;
 
-  /// Adds a search term to the history
-  /// Removes duplicates and maintains the most recent items at the top
+
   static Future<void> addSearchTerm(String term) async {
     try {
       if (term.trim().isEmpty) return;

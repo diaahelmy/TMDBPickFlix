@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pick_flix/ui/component/navigation_helper.dart';
+import '../../../models/search_result.dart';
 import '../../../view/cubit/home/home_genre_recommendation_cubit.dart';
 import '../../../view/cubit/home/home_movies_recommendation_cubit.dart';
 import '../../../view/cubit/home/home_popular_state.dart';
@@ -10,18 +11,16 @@ import '../../../view/cubit/home/popular_movies_cubit.dart';
 import '../../../view/helper/SelectedPreferencesHelper.dart';
 import '../../component/grid_item/movie_grid.dart';
 import '../../component/movie_section_widget.dart';
+import '../move_pages/detail/movie_detail_screen.dart';
 import '../move_pages/popular_screen.dart';
 
-
 class HomeScreen extends StatelessWidget {
-
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final recommendationCubit = context.watch<
-        HomeMoviesRecommendationCubit>();
+    final recommendationCubit = context.watch<HomeMoviesRecommendationCubit>();
     final title = recommendationCubit.lastRecommendationSourceTitle;
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -60,13 +59,16 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            MovieSectionWidget<HomeMoviesRecommendationCubit, HomeMoviesRecommendationState>(
+            MovieSectionWidget<
+              HomeMoviesRecommendationCubit,
+              HomeMoviesRecommendationState
+            >(
               title: title != null
                   ? 'Recommended (from "$title")'
                   : 'Recommended',
               onSeeAll: () {},
               buildWhen: (state) =>
-              state is HomeSelectedRecommendationLoading ||
+                  state is HomeSelectedRecommendationLoading ||
                   state is HomeSelectedRecommendationLoaded ||
                   state is HomeSelectedRecommendationError,
 
@@ -74,17 +76,28 @@ class HomeScreen extends StatelessWidget {
               isLoading: (state) => state is HomeSelectedRecommendationLoading,
               isLoaded: (state) => state is HomeSelectedRecommendationLoaded,
               isError: (state) => state is HomeSelectedRecommendationError,
-              getMovies: (state) => (state as HomeSelectedRecommendationLoaded).movies,
+              getMovies: (state) =>
+                  (state as HomeSelectedRecommendationLoaded).movies,
 
               movieBuilder: (movies) =>
-                  MovieGrid(items: movies.take(6).toList(),showDetails: true,),
+                  MovieGrid(items: movies.take(6).toList(), showDetails: true
+                  ,onItemTap: (movie){
+                    navigateTo(context, MovieDetailScreen(id: movie.id, source:MediaType.movie.name,
+
+
+                    ));
+
+                    },
+                  ),
 
               onRetry: () async {
-                final selectedItems = await SelectedPreferencesHelper.getSelectedItems();
-                context.read<HomeGeneralRecommendationCubit>().fetchRecommendationsBySelectedMovies(selectedItems);
+                final selectedItems =
+                    await SelectedPreferencesHelper.getSelectedItems();
+                context
+                    .read<HomeGeneralRecommendationCubit>()
+                    .fetchRecommendationsBySelectedMovies(selectedItems);
               },
             ),
-
 
             const SizedBox(height: 16),
             MovieSectionWidget<HomePopularCubit, HomePopularState>(
@@ -93,7 +106,7 @@ class HomeScreen extends StatelessWidget {
                 navigateTo(context, PopularScreen());
               },
               buildWhen: (state) =>
-              state is HomePopularLoading ||
+                  state is HomePopularLoading ||
                   state is HomePopularLoaded ||
                   state is HomePopularError,
               isLoading: (state) => state is HomePopularLoading,
@@ -101,7 +114,13 @@ class HomeScreen extends StatelessWidget {
               isError: (state) => state is HomePopularError,
               getMovies: (state) => (state as HomePopularLoaded).movies,
               movieBuilder: (movies) =>
-                  MovieGrid(items: movies.take(6).toList(),showDetails: true,),
+                  MovieGrid(items: movies.take(6).toList(), showDetails: true   ,onItemTap: (movie){
+                    navigateTo(context, MovieDetailScreen(id: movie.id, source:MediaType.movie.name,
+
+
+                    ));
+
+                  },),
               onRetry: () =>
                   context.read<HomePopularCubit>().fetchPopularMovies(),
             ),
@@ -110,7 +129,7 @@ class HomeScreen extends StatelessWidget {
               title: 'Upcoming',
               onSeeAll: () {},
               buildWhen: (state) =>
-              state is HomeUpcomingLoading ||
+                  state is HomeUpcomingLoading ||
                   state is HomeUpcomingLoaded ||
                   state is HomeUpcomingError,
               isLoading: (state) => state is HomeUpcomingLoading,
@@ -118,7 +137,13 @@ class HomeScreen extends StatelessWidget {
               isError: (state) => state is HomeUpcomingError,
               getMovies: (state) => (state as HomeUpcomingLoaded).movies,
               movieBuilder: (movies) =>
-                  MovieGrid(items: movies.take(6).toList(),showDetails: true,),
+                  MovieGrid(items: movies.take(6).toList(), showDetails: true   ,onItemTap: (movie){
+                    navigateTo(context, MovieDetailScreen(id: movie.id, source:MediaType.movie.name,
+
+
+                    ));
+
+                  },),
               onRetry: () =>
                   context.read<HomeUpcomingCubit>().fetchUpcomingMovies(),
             ),
@@ -127,7 +152,7 @@ class HomeScreen extends StatelessWidget {
               title: 'Top Rated',
               onSeeAll: () {},
               buildWhen: (state) =>
-              state is HomeTopRatedLoading ||
+                  state is HomeTopRatedLoading ||
                   state is HomeTopRatedLoaded ||
                   state is HomeTopRatedError,
               isLoading: (state) => state is HomeTopRatedLoading,
@@ -135,7 +160,13 @@ class HomeScreen extends StatelessWidget {
               isError: (state) => state is HomeTopRatedError,
               getMovies: (state) => (state as HomeTopRatedLoaded).movies,
               movieBuilder: (movies) =>
-                  MovieGrid(items: movies.take(6).toList(),showDetails: true,),
+                  MovieGrid(items: movies.take(6).toList(), showDetails: true   ,onItemTap: (movie){
+                    navigateTo(context, MovieDetailScreen(id: movie.id, source:MediaType.movie.name,
+
+
+                    ));
+
+                  },),
               onRetry: () =>
                   context.read<HomeTopRatedCubit>().fetchTopRatedMovies(),
             ),

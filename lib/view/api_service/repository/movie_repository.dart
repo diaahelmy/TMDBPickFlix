@@ -1,3 +1,4 @@
+import 'package:pick_flix/models/movie_detail_model.dart';
 import 'package:pick_flix/models/search_result.dart';
 
 import '../../../models/movie_model.dart';
@@ -57,8 +58,11 @@ class MovieRepository {
   Future<List<Movie>> getMoviesByRating({double minRating = 7, int page = 1}) {
     return apiService.getMoviesByRating(minRating: minRating, page: page);
   }
-  Future<Movie> getMovieDetails(int movieId) {
-    return apiService.getMovieDetails(movieId);
+  Future<MovieDetail> getMovieDetails({
+    required int id,
+    required String source,
+  }) {
+    return apiService.getDetails(id: id, source: source);
   }
 
 

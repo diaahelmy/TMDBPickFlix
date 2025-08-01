@@ -3,9 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pick_flix/ui/component/no_internet/compact_noInternet_widget.dart';
 import 'package:pick_flix/ui/component/loading_grid_widget.dart';
 import 'package:pick_flix/ui/component/grid_item/movie_grid.dart';
+import '../../../models/search_result.dart';
 import '../../../view/cubit/home/home_popular_state.dart';
 import '../../../view/cubit/home/popular_movies_cubit.dart';
+import '../../component/navigation_helper.dart';
 import '../../component/no_internet/no_internet_widget.dart';
+import 'detail/movie_detail_screen.dart';
 
 class PopularScreen extends StatelessWidget {
   const PopularScreen({super.key});
@@ -69,6 +72,15 @@ class PopularScreen extends StatelessWidget {
                       crossAxisCount: 2,
                       showDetails: true,
                       showDescription: true,
+                      onItemTap: (movie) {
+                        navigateTo(
+                          context,
+                          MovieDetailScreen(
+                            id: movie.id,
+                            source: MediaType.movie.name, // MediaType.movie or MediaType.tv
+                          ),
+                        );
+                      },
                     ),
                     if (isLoadingMore && !isErrorLoadingMore)
                       const Padding(

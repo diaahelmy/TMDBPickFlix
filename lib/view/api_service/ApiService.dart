@@ -1,10 +1,8 @@
-  import 'dart:convert';
-
-  import 'package:http/http.dart' as http;
-
-  import '../../models/movie_model.dart';
-  import '../../models/search_result.dart';
-import '../../ui/component/search/widgets/search_result_grid.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../../models/movie_detail_model.dart';
+import '../../models/movie_model.dart';
+import '../../models/search_result.dart';
 
   class ApiService {
     final String _baseUrl = 'https://api.themoviedb.org/3';
@@ -70,16 +68,19 @@ import '../../ui/component/search/widgets/search_result_grid.dart';
       }
     }
 
-    Future<Movie> getMovieDetails(int movieId) async {
-      final url = '$_baseUrl/movie/$movieId?api_key=$_apiKey&language=en-US';
+    Future<MovieDetail> getDetails({
+      required int id,
+      required String source, // "movie" or "tv"
+    }) async {
+      final url = '$_baseUrl/$source/$id?api_key=$_apiKey&language=en-US';
 
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return Movie.fromJson(data);
+        return MovieDetail.fromJson(data);
       } else {
-        throw Exception('Failed to load movie details');
+        throw Exception('Failed to load $source details');
       }
     }
 
