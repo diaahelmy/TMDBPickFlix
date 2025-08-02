@@ -72,7 +72,8 @@ import '../../models/search_result.dart';
       required int id,
       required String source, // "movie" or "tv"
     }) async {
-      final url = '$_baseUrl/$source/$id?api_key=$_apiKey&language=en-US';
+      final url =
+          '$_baseUrl/$source/$id?api_key=$_apiKey&language=en-US&append_to_response=videos,reviews';
 
       final response = await http.get(Uri.parse(url));
 
@@ -83,7 +84,6 @@ import '../../models/search_result.dart';
         throw Exception('Failed to load $source details');
       }
     }
-
 
 
     Future<List<Movie>> getMoviesByRating({double minRating = 7, int page = 1}) async {

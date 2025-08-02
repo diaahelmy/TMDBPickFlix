@@ -23,7 +23,7 @@ class SearchBody extends StatelessWidget {
         child: LoadingGridWidget(),
       );
     } else if (state is SearchSuccess) {
-      return SearchSuccessWidget(state: state as SearchSuccess, repository: context.read<MovieRepository>(),);
+      return SearchSuccessWidget(state: state as SearchSuccess);
     } else if (state is SearchEmpty) {
       return SearchEmptyWidget(state: state as SearchEmpty);
     } else if (state is SearchError) {

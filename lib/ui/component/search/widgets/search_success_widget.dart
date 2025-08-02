@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pick_flix/ui/component/navigation_helper.dart';
 import 'package:pick_flix/ui/component/search/widgets/search_result_grid.dart';
-import '../../../../view/api_service/repository/movie_repository.dart';
 import '../../../../view/cubit/search/search_cubit.dart';
 import '../../../../view/cubit/search/search_state.dart';
 import '../../../screens/move_pages/detail/movie_detail_screen.dart';
 
 class SearchSuccessWidget extends StatefulWidget {
   final SearchSuccess state;
-  final MovieRepository repository;
 
-  const SearchSuccessWidget({super.key, required this.state, required this.repository});
+
+  const SearchSuccessWidget({super.key, required this.state});
 
   @override
   State<SearchSuccessWidget> createState() => _SuccessStateState();
