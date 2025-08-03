@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:pick_flix/ui/component/%20basecubit/paginated_movies_cubit.dart';
 import 'package:pick_flix/ui/screens/genre_screen.dart';
 import 'package:pick_flix/ui/screens/main_screen.dart';
 import 'package:pick_flix/ui/screens/movies_screen.dart';
@@ -9,7 +8,9 @@ import 'package:pick_flix/view/api_service/ApiService.dart';
 import 'package:pick_flix/view/api_service/repository/movie_repository.dart';
 import 'package:pick_flix/view/cubit/home/home_cubit.dart';
 import 'package:pick_flix/view/cubit/home/home_movies_recommendation/home_movies_recommendation_cubit.dart';
+import 'package:pick_flix/view/cubit/home/top_rate/home_toprated_cubit.dart';
 import 'package:pick_flix/view/cubit/home/upcoming/home_upcoming_cubit.dart';
+import 'package:pick_flix/view/cubit/home/popular/popular_movies_cubit.dart';
 import 'package:pick_flix/view/cubit/main/main_bloc.dart';
 import 'package:pick_flix/view/cubit/movie/movie_bloc.dart';
 import 'package:pick_flix/view/cubit/search/search_cubit.dart';
@@ -86,18 +87,16 @@ class MyApp extends StatelessWidget {
             //   create: (context) => HomeGenreRecommendationCubit(repository),
             // ),
             BlocProvider(
-              create: (context) => PaginatedMoviesCubit(
-                (page) => repository.fetchPopularMovies(page: page),
-              ),
+              create: (context) =>
+                  HomePopularCubit(repository)..fetchPopularMovies(),
             ),
             BlocProvider(
               create: (context) =>
                   HomeUpcomingCubit(repository)..fetchUpcomingMovies(),
             ),
             BlocProvider(
-              create: (context) => PaginatedMoviesCubit(
-                    (page) => repository.fetchTopRatedMovies(page: page),
-              ),
+              create: (context) =>
+                  HomeTopRatedCubit(repository)..fetchTopRatedMovies(),
             ),
 
             BlocProvider(
