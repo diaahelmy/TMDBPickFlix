@@ -17,6 +17,7 @@ import '../../component/home_componant/build_action_buttons.dart';
 import '../../component/movie_section_widget.dart';
 import '../move_pages/detail/movie_detail_screen.dart';
 import '../move_pages/popular_screen.dart';
+import '../move_pages/top_rate.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -153,7 +154,10 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 24),
             MovieSectionWidget<HomeTopRatedCubit, HomeTopRatedState>(
               title: 'Top Rated',
-              onSeeAll: () {},
+              onSeeAll: () {
+                navigateTo(context, TopRateScreen());
+
+              },
               buildWhen: (state) =>
                   state is HomeTopRatedLoading ||
                   state is HomeTopRatedLoaded ||
