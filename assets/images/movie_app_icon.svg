@@ -1,0 +1,106 @@
+<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with gradient -->
+  <defs>
+    <!-- Main gradient background -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1976D2;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1565C0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0D47A1;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Play button gradient -->
+    <linearGradient id="playGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E55A2B;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Film strip gradient -->
+    <linearGradient id="filmGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#FFA000;stop-opacity:0.9" />
+    </linearGradient>
+    
+    <!-- Shadow filter -->
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+    
+    <!-- Glow effect -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- App icon background with rounded corners -->
+  <rect width="256" height="256" rx="55" ry="55" fill="url(#bgGradient)" filter="url(#shadow)"/>
+  
+  <!-- Decorative film strip elements -->
+  <rect x="20" y="40" width="216" height="12" rx="6" fill="url(#filmGradient)" opacity="0.7"/>
+  <rect x="20" y="204" width="216" height="12" rx="6" fill="url(#filmGradient)" opacity="0.7"/>
+  
+  <!-- Film holes -->
+  <circle cx="40" cy="46" r="3" fill="#1565C0"/>
+  <circle cx="60" cy="46" r="3" fill="#1565C0"/>
+  <circle cx="80" cy="46" r="3" fill="#1565C0"/>
+  <circle cx="100" cy="46" r="3" fill="#1565C0"/>
+  <circle cx="120" cy="46" r="3" fill="#1565C0"/>
+  <circle cx="140" cy="46" r="3" fill="#1565C0"/>
+  <circle cx="160" cy="46" r="3" fill="#1565C0"/>
+  <circle cx="180" cy="46" r="3" fill="#1565C0"/>
+  <circle cx="200" cy="46" r="3" fill="#1565C0"/>
+  <circle cx="220" cy="46" r="3" fill="#1565C0"/>
+  
+  <circle cx="40" cy="210" r="3" fill="#1565C0"/>
+  <circle cx="60" cy="210" r="3" fill="#1565C0"/>
+  <circle cx="80" cy="210" r="3" fill="#1565C0"/>
+  <circle cx="100" cy="210" r="3" fill="#1565C0"/>
+  <circle cx="120" cy="210" r="3" fill="#1565C0"/>
+  <circle cx="140" cy="210" r="3" fill="#1565C0"/>
+  <circle cx="160" cy="210" r="3" fill="#1565C0"/>
+  <circle cx="180" cy="210" r="3" fill="#1565C0"/>
+  <circle cx="200" cy="210" r="3" fill="#1565C0"/>
+  <circle cx="220" cy="210" r="3" fill="#1565C0"/>
+  
+  <!-- Main cinema screen -->
+  <rect x="50" y="80" width="156" height="96" rx="12" ry="12" fill="#000000" opacity="0.8"/>
+  <rect x="54" y="84" width="148" height="88" rx="8" ry="8" fill="#1a1a1a"/>
+  
+  <!-- Screen glow effect -->
+  <rect x="54" y="84" width="148" height="88" rx="8" ry="8" fill="url(#playGradient)" opacity="0.1"/>
+  
+  <!-- Play button circle -->
+  <circle cx="128" cy="128" r="32" fill="url(#playGradient)" filter="url(#glow)"/>
+  <circle cx="128" cy="128" r="28" fill="rgba(255,255,255,0.1)"/>
+  
+  <!-- Play triangle -->
+  <polygon points="118,112 118,144 146,128" fill="white" opacity="0.95"/>
+  
+  <!-- Sparkle effects -->
+  <g opacity="0.8">
+    <!-- Top sparkles -->
+    <circle cx="80" cy="70" r="2" fill="#FFD700">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="180" cy="75" r="1.5" fill="#FFA000">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="1.5s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Bottom sparkles -->
+    <circle cx="70" cy="190" r="1.5" fill="#FFD700">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="190" cy="185" r="2" fill="#FFA000">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="2.2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Subtle highlight on top -->
+  <ellipse cx="128" cy="60" rx="80" ry="20" fill="rgba(255,255,255,0.1)"/>
+  
+  <!-- App name hint (optional, can be removed) -->
+  <text x="128" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="rgba(255,255,255,0.3)">MOVIES</text>
+</svg>

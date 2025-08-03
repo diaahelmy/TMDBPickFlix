@@ -79,98 +79,110 @@ class _NoInternetWidgetState extends State<NoInternetWidget>
   }
 
   @override
+
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final screenHeight = MediaQuery.of(context).size.height;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(32),
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Animated Icon with background circle
-              AnimatedBuilder(
-                animation: _pulseAnimation,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _pulseAnimation.value,
-                    child: Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            colorScheme.errorContainer.withOpacity(0.3),
-                            colorScheme.errorContainer.withOpacity(0.1),
-                          ],
+    return SafeArea(
+      child: SingleChildScrollView( // ✅ Scroll when content too big
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: screenHeight - 100, // ✅ To center when enough space
+          ),
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Animated Icon with background circle
+                      AnimatedBuilder(
+                        animation: _pulseAnimation,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: _pulseAnimation.value,
+                            child: Container(
+                              width: 120,
+                              height: 120,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    colorScheme.errorContainer.withOpacity(0.3),
+                                    colorScheme.errorContainer.withOpacity(0.1),
+                                  ],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: colorScheme.error.withOpacity(0.1),
+                                    blurRadius: 20,
+                                    spreadRadius: 5,
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.wifi_off_rounded,
+                                size: 50,
+                                color: colorScheme.error,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // Title with custom styling
+                      Text(
+                        widget.title ?? 'No Internet Connection',
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                          letterSpacing: -0.5,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: colorScheme.error.withOpacity(0.1),
-                            blurRadius: 20,
-                            spreadRadius: 5,
+                        textAlign: TextAlign.center,
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Subtitle with better typography
+                      Container(
+                        constraints: const BoxConstraints(maxWidth: 300),
+                        child: Text(
+                          widget.subtitle ??
+                              'Please check your connection and try again.\nMake sure you\'re connected to Wi-Fi or mobile data.',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            height: 1.5,
                           ),
-                        ],
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                      child: Icon(
-                        Icons.wifi_off_rounded,
-                        size: 50,
-                        color: colorScheme.error,
-                      ),
-                    ),
-                  );
-                },
-              ),
 
-              const SizedBox(height: 32),
+                      const SizedBox(height: 32),
 
-              // Title with custom styling
-              Text(
-                widget.title ?? 'No Internet Connection',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurface,
-                  letterSpacing: -0.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
+                      // Retry button
+                      if (widget.showRetryButton)
+                        _buildRetryButton(context),
 
-              const SizedBox(height: 12),
+                      const SizedBox(height: 16),
 
-              // Subtitle with better typography
-              Container(
-                constraints: const BoxConstraints(maxWidth: 300),
-                child: Text(
-                  widget.subtitle ??
-                      'Please check your connection and try again.\nMake sure you\'re connected to Wi-Fi or mobile data.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    height: 1.5,
+                      // Connection tips
+                      _buildConnectionTips(context),
+                    ],
                   ),
-                  textAlign: TextAlign.center,
                 ),
               ),
-
-              const SizedBox(height: 32),
-
-              // Enhanced retry button
-              if (widget.showRetryButton)
-                _buildRetryButton(context),
-
-              const SizedBox(height: 16),
-
-              // Connection tips
-              _buildConnectionTips(context),
-            ],
+            ),
           ),
         ),
       ),
@@ -303,6 +315,4 @@ class _NoInternetWidgetState extends State<NoInternetWidget>
   }
 }
 
-// Enhanced version with full-screen overlay
 
-// Compact version for smaller spaces

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../models/movie_model.dart';
-import '../../api_service/repository/movie_repository.dart';
+import '../../../../models/movie_model.dart';
+import '../../../api_service/repository/movie_repository.dart';
 import 'home_popular_state.dart';
 
 class HomePopularCubit extends Cubit<HomePopularState> {

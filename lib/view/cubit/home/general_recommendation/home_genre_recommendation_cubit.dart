@@ -1,22 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../models/movie_model.dart';
-import '../../api_service/repository/movie_repository.dart';
-import '../../helper/SelectedPreferencesHelper.dart';
-import 'home_movies_recommendation_cubit.dart';
+import '../../../../models/movie_model.dart';
+import '../../../api_service/repository/movie_repository.dart';
+import '../../../helper/SelectedPreferencesHelper.dart';
+import 'home_genre_recommendation_state.dart';
 
-abstract class HomeGenreRecommendationState {}
 
-class HomeGenreRecommendationInitial extends HomeGenreRecommendationState {}
-class HomeGenreRecommendationLoading extends HomeGenreRecommendationState {}
-class HomeGenreRecommendationLoaded extends HomeGenreRecommendationState {
-  final List<Movie> movies;
-  HomeGenreRecommendationLoaded(this.movies);
-}
-class HomeGenreRecommendationError extends HomeGenreRecommendationState {
-  final String message;
-  HomeGenreRecommendationError(this.message);
-}
 
 class HomeGeneralRecommendationCubit extends Cubit<HomeGenreRecommendationState> {
   final MovieRepository repository;

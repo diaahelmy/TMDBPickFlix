@@ -1,4 +1,4 @@
-import '../../../models/movie_model.dart';
+import '../../../../models/movie_model.dart';
 
 abstract class HomePopularState {}
 

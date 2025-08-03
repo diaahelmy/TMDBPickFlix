@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pick_flix/ui/component/navigation_helper.dart';
 import '../../../models/search_result.dart';
-import '../../../view/cubit/home/home_genre_recommendation_cubit.dart';
-import '../../../view/cubit/home/home_movies_recommendation_cubit.dart';
-import '../../../view/cubit/home/home_popular_state.dart';
-import '../../../view/cubit/home/home_toprated_cubit.dart';
-import '../../../view/cubit/home/home_upcoming_cubit.dart';
-import '../../../view/cubit/home/popular_movies_cubit.dart';
+import '../../../view/cubit/home/general_recommendation/home_genre_recommendation_cubit.dart';
+import '../../../view/cubit/home/home_movies_recommendation/home_movies_recommendation_cubit.dart';
+import '../../../view/cubit/home/home_movies_recommendation/home_movies_recommendation_state.dart';
+import '../../../view/cubit/home/popular/home_popular_state.dart';
+import '../../../view/cubit/home/top_rate/home_toprated_cubit.dart';
+import '../../../view/cubit/home/top_rate/home_toprated_state.dart';
+import '../../../view/cubit/home/upcoming/home_upcoming_cubit.dart';
+import '../../../view/cubit/home/popular/popular_movies_cubit.dart';
+import '../../../view/cubit/home/upcoming/home_upcoming_state.dart';
 import '../../../view/helper/SelectedPreferencesHelper.dart';
 import '../../component/grid_item/movie_grid.dart';
+import '../../component/home_componant/build_action_buttons.dart';
 import '../../component/movie_section_widget.dart';
 import '../move_pages/detail/movie_detail_screen.dart';
 import '../move_pages/popular_screen.dart';
@@ -25,6 +29,14 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
+        leading:
+          IconButton(
+            icon: Icon(
+              Icons.settings_outlined,
+              color: theme.colorScheme.onSurface,
+            ),
+            onPressed: () {},
+          ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
@@ -34,15 +46,7 @@ class HomeScreen extends StatelessWidget {
             color: theme.colorScheme.onSurface,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.settings_outlined,
-              color: theme.colorScheme.onSurface,
-            ),
-            onPressed: () {},
-          ),
-        ],
+
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -54,7 +58,7 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   _buildTabBar(context),
                   const SizedBox(height: 24),
-                  _buildActionButtons(context),
+                  buildActionButtons(context),
                 ],
               ),
             ),
@@ -72,7 +76,6 @@ class HomeScreen extends StatelessWidget {
                   state is HomeSelectedRecommendationLoaded ||
                   state is HomeSelectedRecommendationError,
 
-              /// ✅ البراميترز المطلوبة:
               isLoading: (state) => state is HomeSelectedRecommendationLoading,
               isLoaded: (state) => state is HomeSelectedRecommendationLoaded,
               isError: (state) => state is HomeSelectedRecommendationError,
@@ -228,71 +231,5 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
-    final theme = Theme.of(context);
 
-    return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF8B4513),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 2,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.local_movies, size: 24),
-                const SizedBox(width: 12),
-                Text(
-                  'Movie Deal',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6D4C41),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 2,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.shuffle, size: 24),
-                const SizedBox(width: 12),
-                Text(
-                  'Random Movie Pick!',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 }

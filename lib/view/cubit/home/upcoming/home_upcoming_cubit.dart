@@ -1,19 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../models/movie_model.dart';
-import '../../api_service/repository/movie_repository.dart';
+import '../../../api_service/repository/movie_repository.dart';
+import 'home_upcoming_state.dart';
 
-abstract class HomeUpcomingState {}
 
-class HomeUpcomingInitial extends HomeUpcomingState {}
-class HomeUpcomingLoading extends HomeUpcomingState {}
-class HomeUpcomingLoaded extends HomeUpcomingState {
-  final List<Movie> movies;
-  HomeUpcomingLoaded(this.movies);
-}
-class HomeUpcomingError extends HomeUpcomingState {
-  final String message;
-  HomeUpcomingError(this.message);
-}
 
 class HomeUpcomingCubit extends Cubit<HomeUpcomingState> {
   final MovieRepository repository;

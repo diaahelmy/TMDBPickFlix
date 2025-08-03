@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../../../../models/movie_detail_model.dart';
 import '../../../../models/video_result.dart';
 import '../../../../view/cubit/detail/movie_detail_cubit.dart';
 import '../../../../view/cubit/detail/movie_detail_state.dart';
+import '../../../component/no_internet/no_internet_widget.dart';
+import '../../../component/video_player/video_player_dialog.dart';
 
 class MovieDetailScreen extends StatelessWidget {
   final int id;
@@ -28,7 +29,7 @@ class MovieDetailScreen extends StatelessWidget {
               MovieDetailLoading() => const _LoadingView(),
               MovieDetailLoaded(:final movieDetail) =>
                   _DetailView(movieDetail: movieDetail, source: source),
-              MovieDetailError(:final message) => _ErrorView(message: message),
+              MovieDetailError() => Center(child: NoInternetWidget(onRetry: () => context.read<MovieDetailCubit>().fetchDetail(id, source: source))),
               MovieDetailInitial() => const SizedBox.shrink(),
             };
           },
@@ -51,34 +52,6 @@ class _LoadingView extends StatelessWidget {
             CircularProgressIndicator(),
             SizedBox(height: 16),
             Text('Loading movie details...'),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  final String message;
-
-  const _ErrorView({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Go Back'),
-            ),
           ],
         ),
       ),
@@ -109,8 +82,8 @@ class _DetailView extends StatelessWidget {
               _buildInfoSection(context, theme),
               _buildOverviewSection(context, theme),
               _buildGenresSection(context, theme),
+              _buildVideosSection(context, theme),
               _buildStatsSection(context, theme),
-              _buildProductionSection(context, theme),
               const SizedBox(height: 32),
             ],
           ),
@@ -120,54 +93,315 @@ class _DetailView extends StatelessWidget {
   }
 
   Widget _buildAppBar(BuildContext context, ThemeData theme) {
-    final firstTrailer = movieDetail.allTrailers.isNotEmpty
-        ? movieDetail.allTrailers.first
-        : null;
-
-    final backdropUrl = movieDetail.backdropPath != null
-        ? 'https://image.tmdb.org/t/p/w1280${movieDetail.backdropPath}'
-        : 'https://image.tmdb.org/t/p/w500${movieDetail.posterPath}';
+    final isDark = theme.brightness == Brightness.dark;
 
     return SliverAppBar(
       pinned: true,
-      expandedHeight: 250,
-      flexibleSpace: FlexibleSpaceBar(
-        background: firstTrailer != null
-            ? GestureDetector(
-          onTap: () => _playTrailer(context, firstTrailer),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.network(
-                firstTrailer.youtubeThumbnail,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  color: Colors.black26,
-                  alignment: Alignment.center,
-                  child: const Icon(Icons.play_circle_fill, size: 60, color: Colors.white),
-                ),
-              ),
-              Container(
+      expandedHeight: 300,
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      foregroundColor: isDark ? Colors.white : Colors.white,
+
+      // Custom leading button
+      leading: Container(
+        margin: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.6),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.2),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.white,
+            size: 20,
+          ),
+        ),
+      ),
+
+      // Custom actions
+      actions: [
+        Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.6),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.2),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
                 color: Colors.black.withOpacity(0.3),
-                child: const Center(
-                  child: Icon(
-                    Icons.play_circle_fill,
-                    color: Colors.white,
-                    size: 64,
-                  ),
-                ),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
-        )
-            : Image.network(
-          backdropUrl,
-          fit: BoxFit.cover,
+          child: IconButton(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Added to favorites'),
+                  backgroundColor: const Color(0xFFFF6B35),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(
+              Icons.favorite_border,
+              color: Colors.white,
+              size: 22,
+            ),
+          ),
         ),
+        Container(
+          margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.6),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.2),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: IconButton(
+            onPressed: () {
+              _shareMovie(context);
+            },
+            icon: const Icon(
+              Icons.share,
+              color: Colors.white,
+              size: 22,
+            ),
+          ),
+        ),
+      ],
+
+      flexibleSpace: FlexibleSpaceBar(
+        background: _buildImageSlider(context),
       ),
     );
   }
 
+  Widget _buildImageSlider(BuildContext context) {
+    // جمع جميع الصور المتاحة
+    final List<String> images = _getMovieImages();
+
+    return Container(
+      height: 300,
+      child: Stack(
+        children: [
+          // Image Slider
+          PageView.builder(
+            itemCount: images.length,
+            itemBuilder: (context, index) {
+              return Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(images[index]),
+                    fit: BoxFit.cover,
+                    onError: (error, stackTrace) {
+                      // Fallback to gradient background
+                    },
+                  ),
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.3),
+                        Colors.black.withOpacity(0.7),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+            onPageChanged: (index) {
+              // يمكنك إضافة منطق هنا للتحكم في الصفحة الحالية
+            },
+          ),
+
+          // Page indicators
+          Positioned(
+            bottom: 20,
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                images.length,
+                    (index) => Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.8),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Play button overlay للتريلر (إذا كان متوفر)
+          if (movieDetail.allTrailers.isNotEmpty)
+            Positioned.fill(
+              child: Center(
+                child: GestureDetector(
+                  onTap: () => _playTrailer(context, movieDetail.allTrailers.first),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.black.withOpacity(0.6),
+                      border: Border.all(
+                        color: const Color(0xFFFF6B35),
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFFF6B35).withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.play_arrow,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          // Movie title overlay
+          Positioned(
+            bottom: 60,
+            left: 20,
+            right: 20,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  movieDetail.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        offset: Offset(0, 2),
+                        blurRadius: 4,
+                        color: Colors.black,
+                      ),
+                    ],
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (movieDetail.tagline?.isNotEmpty == true) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    movieDetail.tagline!,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 16,
+                      fontStyle: FontStyle.italic,
+                      shadows: const [
+                        Shadow(
+                          offset: Offset(0, 1),
+                          blurRadius: 2,
+                          color: Colors.black,
+                        ),
+                      ],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+// دالة لجمع صور الفيلم
+  List<String> _getMovieImages() {
+    List<String> images = [];
+
+    // إضافة backdrop image
+    if (movieDetail.backdropPath != null) {
+      images.add('https://image.tmdb.org/t/p/w1280${movieDetail.backdropPath}');
+    }
+
+    // إضافة poster image
+    if (movieDetail.posterPath != null) {
+      images.add('https://image.tmdb.org/t/p/w500${movieDetail.posterPath}');
+    }
+
+    // إضافة صور التريلر
+    for (var trailer in movieDetail.allTrailers.take(3)) {
+      images.add(trailer.youtubeThumbnail);
+    }
+
+    // إضافة صور الإنتاج (إذا كانت متوفرة)
+    for (var company in movieDetail.productionCompanies.take(2)) {
+      if (company.logoPath != null) {
+        images.add('https://image.tmdb.org/t/p/w200${company.logoPath}');
+      }
+    }
+
+    // إذا لم تكن هناك صور، أضف صورة افتراضية
+    if (images.isEmpty) {
+      images.add('https://via.placeholder.com/1280x720/1976D2/FFFFFF?text=Movie');
+    }
+
+    return images;
+  }
+
+// Add share functionality
+  void _shareMovie(BuildContext context) {
+    // You can implement actual sharing logic here
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Sharing ${movieDetail.title}'),
+        backgroundColor: const Color(0xFF1976D2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
   Widget _buildHeroSection(BuildContext context, ThemeData theme) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -441,158 +675,6 @@ class _DetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildProductionSection(BuildContext context, ThemeData theme) {
-    if (movieDetail.productionCompanies.isEmpty) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Production Companies',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 80,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: movieDetail.productionCompanies.length,
-              itemBuilder: (context, index) {
-                final company = movieDetail.productionCompanies[index];
-                return Container(
-                  width: 120,
-                  margin: const EdgeInsets.only(right: 12),
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (company.logoPath != null) ...[
-                            Expanded(
-                              child: Image.network(
-                                'https://image.tmdb.org/t/p/w200${company.logoPath}',
-                                fit: BoxFit.contain,
-                                errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.business),
-                              ),
-                            ),
-                          ] else ...[
-                            const Icon(Icons.business),
-                            const SizedBox(height: 4),
-                            Text(
-                              company.name,
-                              style: theme.textTheme.bodySmall,
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTrailerSection(BuildContext context, ThemeData theme) {
-    final mainTrailer = movieDetail.mainTrailer;
-    if (mainTrailer == null) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: Image.network(
-                    mainTrailer.youtubeThumbnail,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      color: theme.colorScheme.surfaceVariant,
-                      child: const Icon(Icons.play_circle, size: 64),
-                    ),
-                  ),
-                ),
-                Positioned.fill(
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => _playTrailer(context, mainTrailer),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.3),
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.play_circle_fill,
-                            size: 72,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    mainTrailer.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Chip(
-                        label: Text(mainTrailer.type),
-                        backgroundColor: theme.colorScheme.primaryContainer,
-                        labelStyle: TextStyle(
-                          color: theme.colorScheme.onPrimaryContainer,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      if (mainTrailer.official)
-                        Chip(
-                          label: const Text('Official'),
-                          backgroundColor: Colors.green.withOpacity(0.2),
-                          labelStyle: const TextStyle(
-                            color: Colors.green,
-                            fontSize: 12,
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildVideosSection(BuildContext context, ThemeData theme) {
     final allTrailers = movieDetail.allTrailers;
@@ -611,71 +693,145 @@ class _DetailView extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           SizedBox(
-            height: 140,
+            height: 160,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: allTrailers.length,
               itemBuilder: (context, index) {
                 final video = allTrailers[index];
                 return Container(
-                  width: 200,
+                  width: 240,
                   margin: const EdgeInsets.only(right: 12),
                   child: Card(
                     clipBehavior: Clip.antiAlias,
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: InkWell(
                       onTap: () => _playTrailer(context, video),
+                      borderRadius: BorderRadius.circular(12),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // صورة الفيديو
                           Expanded(
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                Image.network(
-                                  video.youtubeThumbnail,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      Container(
-                                        color: theme.colorScheme.surfaceVariant,
-                                        child: const Icon(Icons.play_circle),
-                                      ),
-                                ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.3),
+                            flex: 3,
+                            child: Container(
+                              width: double.infinity,
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  Image.network(
+                                    video.youtubeThumbnail,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) =>
+                                        Container(
+                                          color: theme.colorScheme.surfaceVariant,
+                                          child: const Icon(
+                                            Icons.play_circle,
+                                            size: 40,
+                                          ),
+                                        ),
                                   ),
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.play_circle_fill,
-                                      color: Colors.white,
-                                      size: 32,
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.center,
+                                        end: Alignment.center,
+                                        colors: [
+                                          Colors.black.withOpacity(0.1),
+                                          Colors.black.withOpacity(0.3),
+                                        ],
+                                      ),
+                                    ),
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.play_circle_fill,
+                                        color: Colors.white,
+                                        size: 36,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                  // مدة الفيديو
+                                  Positioned(
+                                    bottom: 8,
+                                    right: 8,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.7),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        video.type == 'Trailer' ? 'Trailer' : 'Video',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  video.name,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.w500,
+                          // معلومات الفيديو
+                          Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    video.name,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.2,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  video.type,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          video.type,
+                                          style: theme.textTheme.bodySmall?.copyWith(
+                                            color: theme.colorScheme.onSurfaceVariant,
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                      ),
+                                      if (video.official)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 4,
+                                            vertical: 1,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.green.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Text(
+                                            'Official',
+                                            style: TextStyle(
+                                              color: Colors.green[600],
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -690,11 +846,10 @@ class _DetailView extends StatelessWidget {
       ),
     );
   }
-
   void _playTrailer(BuildContext context, Video video) {
     showDialog(
       context: context,
-      builder: (context) => _VideoPlayerDialog(video: video),
+      builder: (context) => VideoPlayerDialog(video: video),
     );
   }
 
@@ -706,96 +861,3 @@ class _DetailView extends StatelessWidget {
   }
 }
 
-class _VideoPlayerDialog extends StatefulWidget {
-  final Video video;
-
-  const _VideoPlayerDialog({required this.video});
-
-  @override
-  State<_VideoPlayerDialog> createState() => _VideoPlayerDialogState();
-}
-
-class _VideoPlayerDialogState extends State<_VideoPlayerDialog> {
-  late YoutubePlayerController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = YoutubePlayerController(
-      initialVideoId: widget.video.key,
-      flags: const YoutubePlayerFlags(
-        autoPlay: true,
-        mute: false,
-        enableCaption: true,
-        captionLanguage: 'en',
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.black,
-      insetPadding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            title: Text(
-              widget.video.name,
-              style: const TextStyle(color: Colors.white),
-            ),
-            iconTheme: const IconThemeData(color: Colors.white),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.open_in_new),
-                onPressed: () async {
-                  final url = Uri.parse(widget.video.youtubeUrl);
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url, mode: LaunchMode.externalApplication);
-                  }
-                },
-              ),
-            ],
-          ),
-          YoutubePlayer(
-            controller: _controller,
-            showVideoProgressIndicator: true,
-            progressIndicatorColor: Colors.red,
-            progressColors: const ProgressBarColors(
-              playedColor: Colors.red,
-              handleColor: Colors.redAccent,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Chip(
-                  label: Text(widget.video.type),
-                  backgroundColor: Colors.white.withOpacity(0.2),
-                  labelStyle: const TextStyle(color: Colors.white),
-                ),
-                const SizedBox(width: 8),
-                if (widget.video.official)
-                  Chip(
-                    label: const Text('Official'),
-                    backgroundColor: Colors.green.withOpacity(0.3),
-                    labelStyle: const TextStyle(color: Colors.white),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
