@@ -9,7 +9,7 @@ class HomePopularCubit extends Cubit<HomePopularState> {
   HomePopularCubit(this.repository) : super(HomePopularInitial());
 
   int _currentPage = 1;
-  List<Movie> _popularMovies = [];
+  final List<Movie> _popularMovies = [];
   bool _isLoadingMore = false;
   bool _hasReachedMax = false;
 

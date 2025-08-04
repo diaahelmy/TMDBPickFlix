@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pick_flix/ui/component/navigation_helper.dart';
+import 'package:pick_flix/ui/screens/move_pages/up_coming_screen.dart';
 import '../../../models/search_result.dart';
 import '../../../view/cubit/home/general_recommendation/home_genre_recommendation_cubit.dart';
 import '../../../view/cubit/home/home_movies_recommendation/home_movies_recommendation_cubit.dart';
@@ -17,7 +18,7 @@ import '../../component/home_componant/build_action_buttons.dart';
 import '../../component/movie_section_widget.dart';
 import '../move_pages/detail/movie_detail_screen.dart';
 import '../move_pages/popular_screen.dart';
-import '../move_pages/top_rate.dart';
+import '../move_pages/top_rate_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -30,14 +31,15 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        leading:
-          IconButton(
-            icon: Icon(
-              Icons.settings_outlined,
-              color: theme.colorScheme.onSurface,
-            ),
-            onPressed: () {},
+        leading: IconButton(
+          icon: Image.asset(
+            'assets/images/svgviewer.png',
+            width: 100,  // حجم الصورة
+            height: 100,
+
           ),
+          onPressed: () {},
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
@@ -131,7 +133,10 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 24),
             MovieSectionWidget<HomeUpcomingCubit, HomeUpcomingState>(
               title: 'Upcoming',
-              onSeeAll: () {},
+              onSeeAll: () {
+                navigateTo(context, UpComingScreen());
+
+              },
               buildWhen: (state) =>
                   state is HomeUpcomingLoading ||
                   state is HomeUpcomingLoaded ||

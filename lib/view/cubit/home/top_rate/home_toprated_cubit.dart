@@ -11,7 +11,7 @@ class HomeTopRatedCubit extends Cubit<HomeTopRatedState> {
   HomeTopRatedCubit(this.repository) : super(HomeTopRatedInitial());
 
   int _currentPage = 1;
-  List<Movie> _toprateMovies = [];
+  final List<Movie> _toprateMovies = [];
   bool _isLoadingMore = false;
   bool _hasReachedMax = false;
 
