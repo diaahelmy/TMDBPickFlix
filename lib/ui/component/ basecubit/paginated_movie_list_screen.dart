@@ -7,6 +7,7 @@ import 'package:pick_flix/ui/component/no_internet/compact_noInternet_widget.dar
 import 'package:pick_flix/ui/component/no_internet/no_internet_widget.dart';
 import '../../../models/movie_model.dart';
 import '../../../models/search_result.dart';
+import '../../../view/cubit/tab_change/TabState.dart';
 import '../../screens/move_pages/detail/movie_detail_screen.dart';
 
 class PaginatedMovieListScreen<TCubit extends Cubit<TState>, TState, TItem extends Movie>
@@ -79,11 +80,16 @@ class PaginatedMovieListScreen<TCubit extends Cubit<TState>, TState, TItem exten
                       showDetails: true,
                       showDescription: true,
                       onItemTap: (movie) {
+                        final selectedTab = context.read<TabCubit>().state.selectedTab;
+                        final source = selectedTab == ContentType.movie
+                            ? MediaType.movie.name
+                            : MediaType.tv.name;
+
                         navigateTo(
                           context,
                           MovieDetailScreen(
                             id: movie.id,
-                            source: MediaType.movie.name,
+                            source: source,
                           ),
                         );
                       },

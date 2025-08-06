@@ -1,12 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../../models/search_result.dart';
-import '../../../view/cubit/home/home_movies_recommendation/home_movies_recommendation_cubit.dart';
 import '../../../view/cubit/home/popular/popular_movies_cubit.dart';
 import '../../../view/cubit/home/top_rate/home_toprated_cubit.dart';
 import '../../../view/cubit/home/upcoming/home_upcoming_cubit.dart';
+import '../../../view/cubit/tab_change/TabState.dart';
 import '../../screens/move_pages/detail/movie_detail_screen.dart';
 import '../navigation_helper.dart';
 import 'build_quick_action_card.dart';
@@ -14,7 +13,10 @@ import 'build_quick_action_card.dart';
 Widget buildActionButtons(BuildContext context) {
   final theme = Theme.of(context);
   final isDark = theme.brightness == Brightness.dark;
-
+  final selectedTab = context.read<TabCubit>().state.selectedTab;
+  final source = selectedTab == ContentType.movie
+      ? MediaType.movie.name
+      : MediaType.tv.name;
   return Column(
     children: [
       // Movie Deal Button
@@ -68,7 +70,8 @@ Widget buildActionButtons(BuildContext context) {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Movie Deal',
+                          selectedTab == ContentType.movie?
+                          'Movie Deal':'TV Show Deal',
                           style: theme.textTheme.titleLarge?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
@@ -101,6 +104,7 @@ Widget buildActionButtons(BuildContext context) {
 
       // Random Movie Pick Button
     Container(
+
           width: double.infinity,
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -121,12 +125,13 @@ Widget buildActionButtons(BuildContext context) {
             ],
           ),
           child: Material(
+
             color: Colors.transparent,
             child: InkWell(
               onTap: () {
                 final popularMovies = context.read<HomePopularCubit>().cachedPopularMovies;
-                final topRatedMovies = context.read<HomeTopRatedCubit>().cachedTopRateMovies;
-                final upcomingMovies = context.read<HomeUpcomingCubit>().cachedupcomingMovies;
+                final topRatedMovies = context.read<HomeTopRatedCubit>().cachedTopRatedMovies;
+                final upcomingMovies = context.read<HomeUpcomingCubit>().cachedUpcomingMovies;
 
 
                 final allMovies = [
@@ -143,7 +148,7 @@ Widget buildActionButtons(BuildContext context) {
                     context,
                     MovieDetailScreen(
                       id: randomMovie.id,
-                      source: MediaType.movie.name,
+                      source: source,
                     ),
                   );
                 } else {
@@ -151,9 +156,17 @@ Widget buildActionButtons(BuildContext context) {
                     const SnackBar(content: Text('Loading movies... please try again')),
                   );
 
-                  context.read<HomePopularCubit>().fetchPopularMovies();
-                  context.read<HomeTopRatedCubit>().fetchTopRatedMovies();
-                  context.read<HomeUpcomingCubit>().fetchUpcomingMovies();
+                  context.read<HomePopularCubit>().fetchPopularMovies(
+                    ContentType.movie,
+                  );
+                  context.read<HomeTopRatedCubit>().fetchTopRatedMovies(
+                    ContentType.movie,
+
+                  );
+                  context.read<HomeUpcomingCubit>().fetchUpcomingMovies(
+                    ContentType.movie,
+
+                  );
                 }
               },
               child: Padding(
@@ -176,10 +189,14 @@ Widget buildActionButtons(BuildContext context) {
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
+
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+
+
                           Text(
-                            'Random Movie Pick!',
+                            selectedTab == ContentType.movie?
+                            'Random Movie Pick!':'Random TV Show Pick!',
                             style: theme.textTheme.titleLarge?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,

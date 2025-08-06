@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../models/movie_model.dart';
 import '../../../api_service/repository/movie_repository.dart';
+import '../../tab_change/TabState.dart';
 import 'home_popular_state.dart';
 
 class HomePopularCubit extends Cubit<HomePopularState> {
@@ -19,7 +20,8 @@ class HomePopularCubit extends Cubit<HomePopularState> {
   bool get isLoadingMore => _isLoadingMore;
   bool get hasReachedMax => _hasReachedMax;
 
-  Future<void> fetchPopularMovies({bool loadMore = false}) async {
+  /// ✅ جلب الأفلام أو المسلسلات الأكثر شعبية
+  Future<void> fetchPopularMovies(ContentType type, {bool loadMore = false}) async {
     try {
       if (_isLoadingMore && loadMore) return;
       if (loadMore && _hasReachedMax) return;
@@ -37,7 +39,14 @@ class HomePopularCubit extends Cubit<HomePopularState> {
         emit(HomePopularLoaded(List.of(_popularMovies)));
       }
 
-      final newMovies = await repository.fetchPopularMovies(page: _currentPage);
+      // ✅ تحديد المصدر بناءً على التبويب
+      final source = type == ContentType.movie ? "movie" : "tv";
+
+      final newMovies = await repository.fetchContent(
+        source: source,
+        category: "popular",
+        page: _currentPage,
+      );
 
       if (newMovies.length < 20) {
         _hasReachedMax = true;
@@ -54,10 +63,9 @@ class HomePopularCubit extends Cubit<HomePopularState> {
     } catch (e) {
       debugPrint("❌ Error fetching popular movies: $e");
 
-
       if (loadMore) {
         hasErrorLoadingMore = true;
-        emit(HomePopularLoaded(List.of(_popularMovies))); // don't show full-screen error
+        emit(HomePopularLoaded(List.of(_popularMovies))); // لا تظهر خطأ ملء الشاشة
       } else {
         emit(HomePopularError(e.toString()));
       }
@@ -66,12 +74,12 @@ class HomePopularCubit extends Cubit<HomePopularState> {
     }
   }
 
-  // Method to refresh the data
-  Future<void> refresh() async {
-    await fetchPopularMovies(loadMore: false);
+  /// ✅ تحديث البيانات (سحب للتحديث)
+  Future<void> refresh(ContentType type) async {
+    await fetchPopularMovies(type, loadMore: false);
   }
 
-  // Method to clear cache
+  /// ✅ مسح الكاش وإعادة الحالة الأساسية
   void clearCache() {
     _popularMovies.clear();
     _currentPage = 1;

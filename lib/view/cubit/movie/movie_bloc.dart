@@ -55,7 +55,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     emit(currentState.copyWith(isTopRatedTvLoading: true));
 
     try {
-      final movies = await repository.fetchTopRatedTv();
+      final movies = await repository.fetchContent(source: 'movie', category: 'top_rate');
 
       emit(
         currentState.copyWith(
@@ -86,7 +86,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     }
     emit(currentState.copyWith(isTopRatedLoading: true));
     try {
-      final movies = await repository.fetchTopRatedMovies();
+      final movies = await repository.fetchContent(source: 'tv', category: 'top_rate');
       emit(
         currentState.copyWith(
           topRatedMovies: movies,

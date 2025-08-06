@@ -15,6 +15,7 @@ import 'package:pick_flix/view/cubit/main/main_bloc.dart';
 import 'package:pick_flix/view/cubit/movie/movie_bloc.dart';
 import 'package:pick_flix/view/cubit/search/search_cubit.dart';
 import 'package:pick_flix/view/cubit/split_screen/cubit_split_screen.dart';
+import 'package:pick_flix/view/cubit/tab_change/TabState.dart';
 import 'package:pick_flix/view/data/genre_event.dart';
 import 'package:pick_flix/view/data/movie_event.dart';
 import 'package:pick_flix/view/helper/SelectedPreferencesHelper.dart';
@@ -87,16 +88,24 @@ class MyApp extends StatelessWidget {
             //   create: (context) => HomeGenreRecommendationCubit(repository),
             // ),
             BlocProvider(
-              create: (context) =>
-                  HomePopularCubit(repository)..fetchPopularMovies(),
+              create: (context) => TabCubit(),
             ),
             BlocProvider(
               create: (context) =>
-                  HomeUpcomingCubit(repository)..fetchUpcomingMovies(),
+                  HomePopularCubit(repository)..fetchPopularMovies(
+                  ContentType.movie,),
             ),
             BlocProvider(
               create: (context) =>
-                  HomeTopRatedCubit(repository)..fetchTopRatedMovies(),
+                  HomeUpcomingCubit(repository)..fetchUpcomingMovies(
+                    ContentType.movie,
+                  ),
+            ),
+            BlocProvider(
+              create: (context) =>
+                  HomeTopRatedCubit(repository)..fetchTopRatedMovies(
+                      ContentType.movie
+                  ),
             ),
 
             BlocProvider(
