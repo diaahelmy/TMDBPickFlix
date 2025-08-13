@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../models/movie_model.dart';
 import '../../../view/cubit/home/popular/home_popular_state.dart';
 import '../../../view/cubit/home/popular/popular_movies_cubit.dart';
@@ -13,8 +14,11 @@ class PopularScreen extends StatelessWidget {
     return PaginatedMovieListScreen<HomePopularCubit, HomePopularState, Movie>(
       title: 'Popular Movies',
       getMovies: (cubit) => cubit.cachedPopularMovies,
-        fetchMovies: (cubit, {loadMore = false}) =>
-            cubit.fetchPopularMovies(ContentType.movie,loadMore: loadMore),
+      fetchMovies: (cubit, {loadMore = false}) {
+        final selectedTab = context.read<TabCubit>().state.selectedTab;
+
+      return  cubit.fetchPopularMovies(selectedTab, loadMore: loadMore);
+      },
       isLoading: (state) => state is HomePopularLoading,
       isError: (state) => state is HomePopularError,
       isLoadingMore: (cubit) => cubit.isLoadingMore,
