@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pick_flix/ui/screens/genre_screen.dart';
+import 'package:pick_flix/ui/screens/login-out/login_screen.dart';
 import 'package:pick_flix/ui/screens/main_screen.dart';
 import 'package:pick_flix/ui/screens/movies_screen.dart';
 import 'package:pick_flix/view/api_service/ApiService.dart';
@@ -36,7 +37,7 @@ void main() async {
   } else if (selectedMovies.isEmpty) {
     initialScreen = const FavoritesSelectionScreen();
   } else {
-    initialScreen = const MainScreen();
+    initialScreen =  LoginScreen();
   }
 
   runApp(

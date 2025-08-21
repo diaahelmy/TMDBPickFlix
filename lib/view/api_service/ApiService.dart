@@ -55,6 +55,7 @@ import '../../models/search_result.dart';
       }
     }
 
+
     Future<List<Movie>> fetchMoviesByGenres(int genreId, {int page = 1}) async {
       final url = '$_baseUrl/discover/movie?api_key=$_apiKey&language=en-US&with_genres=$genreId&page=$page';
 
@@ -65,6 +66,32 @@ import '../../models/search_result.dart';
         return movies.map((json) => Movie.fromJson(json)).toList();
       } else {
         throw Exception('Failed to load movies by genres');
+      }
+    }
+
+    Future<String> createSession(String token) async {
+      final url = '$_baseUrl/authentication/session/new?api_key=$_apiKey';
+      final response = await http.post(
+        Uri.parse(url),
+        body: {'request_token': token},
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['session_id'];
+      } else {
+        throw Exception('Failed to create session');
+      }
+    }
+
+    Future<String> createRequestToken() async {
+      final url = '$_baseUrl/authentication/token/new?api_key=$_apiKey';
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['request_token'];
+      } else {
+        throw Exception('Failed to create request token');
       }
     }
 
@@ -99,4 +126,32 @@ import '../../models/search_result.dart';
         throw Exception('Failed to load movies by rating');
       }
     }
+
+
+    /// ⬅️ Step 2: Validate Request Token with Login
+    Future<String> validateWithLogin({
+      required String username,
+      required String password,
+      required String requestToken,
+    }) async {
+      final url = '$_baseUrl/authentication/token/validate_with_login?api_key=$_apiKey';
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'username': username,
+          'password': password,
+          'request_token': requestToken,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['request_token'];
+      } else {
+        throw Exception('Failed to validate token with login');
+      }
+    }
+
+
   }

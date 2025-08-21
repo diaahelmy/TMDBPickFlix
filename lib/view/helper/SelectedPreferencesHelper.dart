@@ -4,7 +4,10 @@ class SelectedMovieWithSource {
   final int id;
   final String source; // "movie" أو "tv"
 
-  SelectedMovieWithSource({required this.id, required this.source});
+  SelectedMovieWithSource({
+    required this.id,
+    required this.source,
+  });
 
   @override
   String toString() => '$source|$id';
@@ -20,33 +23,33 @@ class SelectedMovieWithSource {
 
 class SelectedPreferencesHelper {
   static const _selectedGenresKey = 'selected_genres';
-  static const _selectedItemsKey = 'selected_items'; // أفلام ومسلسلات
+  static const _selectedItemsKey = 'selected_items';
 
-  // حفظ التصنيفات المختارة
+  /// حفظ التصنيفات
   static Future<void> saveSelectedGenres(List<int> genreIds) async {
-    await Cache.setStringList(
+    await Cache.saveData(
       key: _selectedGenresKey,
       value: genreIds.map((e) => e.toString()).toList(),
     );
   }
 
-  // استرجاع التصنيفات المختارة
+  /// استرجاع التصنيفات
   static List<int> getSelectedGenres() {
-    final ids = Cache.getStringList(_selectedGenresKey);
+    final ids = Cache.getData(_selectedGenresKey) as List<String>?;
     return ids?.map(int.parse).toList() ?? [];
   }
 
-  // حفظ الأفلام/المسلسلات المختارة
+  /// حفظ الأفلام/المسلسلات
   static Future<void> saveSelectedItems(List<SelectedMovieWithSource> items) async {
-    await Cache.setStringList(
+    await Cache.saveData(
       key: _selectedItemsKey,
-      value: items.map((e) => e.toString()).toList(), // ex: movie|123
+      value: items.map((e) => e.toString()).toList(),
     );
   }
 
-  // استرجاع الأفلام/المسلسلات المختارة
-  static Future<List<SelectedMovieWithSource>> getSelectedItems() async {
-    final rawList = Cache.getStringList(_selectedItemsKey) ?? [];
+  /// استرجاع الأفلام/المسلسلات
+  static List<SelectedMovieWithSource> getSelectedItems() {
+    final rawList = Cache.getData(_selectedItemsKey) as List<String>? ?? [];
     return rawList.map((str) => SelectedMovieWithSource.fromString(str)).toList();
   }
 }

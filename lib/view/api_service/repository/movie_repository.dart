@@ -17,6 +17,8 @@ class MovieRepository {
     return apiService.fetchMovies("$source/$category", page: page);
   }
 
+
+
   /// ✅ جلب المحتوى الترند
   Future<List<Movie>> fetchTrending({
     required String source, // "movie" or "tv"
@@ -50,6 +52,7 @@ class MovieRepository {
     return apiService.getMoviesByRating(minRating: minRating, page: page);
   }
 
+
   /// ✅ تفاصيل فيلم أو مسلسل
   Future<MovieDetail> getMovieDetails({
     required int id,
@@ -62,4 +65,5 @@ class MovieRepository {
   Future<List<SearchResult>> searchMovies(String query, {int page = 1}) {
     return apiService.searchMulti(query, page: page);
   }
+
 }

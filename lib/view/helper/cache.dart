@@ -1,25 +1,40 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Cache {
-  static late SharedPreferences sharedPreferences;
+  static late SharedPreferences _sharedPreferences;
 
+  /// Initialize SharedPreferences
   static Future<void> init() async {
-    sharedPreferences = await SharedPreferences.getInstance();
+    _sharedPreferences = await SharedPreferences.getInstance();
   }
 
-  static Future<void> setBool({required String key, required bool value}) async {
-    await sharedPreferences.setBool(key, value);
+  /// Save data (supports String, int, bool, double, List<String>)
+  static Future<bool> saveData({
+    required String key,
+    required dynamic value,
+  }) async {
+    if (value is String) return await _sharedPreferences.setString(key, value);
+    if (value is int) return await _sharedPreferences.setInt(key, value);
+    if (value is bool) return await _sharedPreferences.setBool(key, value);
+    if (value is double) return await _sharedPreferences.setDouble(key, value);
+    if (value is List<String>) return await _sharedPreferences.setStringList(key, value);
+
+    throw Exception("Unsupported value type: ${value.runtimeType}");
   }
 
-  static bool? getBool(String key) {
-    return sharedPreferences.getBool(key);
+
+  /// Get data by key
+  static dynamic getData(String key) {
+    return _sharedPreferences.get(key);
   }
 
-  static Future<void> setStringList({required String key, required List<String> value}) async {
-    await sharedPreferences.setStringList(key, value);
+  /// Remove data by key
+  static Future<bool> removeData(String key) async {
+    return await _sharedPreferences.remove(key);
   }
 
-  static List<String>? getStringList(String key) {
-    return sharedPreferences.getStringList(key);
+  /// Clear all cache
+  static Future<bool> clear() async {
+    return await _sharedPreferences.clear();
   }
 }
