@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pick_flix/view/cubit/login/status_login.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../models/user_model.dart';
 import '../../api_service/ApiService.dart';
 
@@ -31,8 +32,20 @@ class AuthCubit extends Cubit<AuthState> {
 
       // Step 3: Create Session
       final sessionId = await apiService.createSession(validatedToken);
+      // Step 4: Get Account Details → عشان تجيب account_id
+      final account = await apiService.getAccountDetails(sessionId);
+      final accountId = account["id"];
 
-      userModel = UserModel(sessionId: sessionId, requestToken: validatedToken);
+
+      userModel = UserModel(
+        sessionId: sessionId,
+        requestToken: validatedToken,
+      );
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('session_id', sessionId);
+      await prefs.setInt('account_id', accountId);
+
       emit(AuthLoginSuccess(userModel!));
     } catch (error) {
       emit(AuthLoginError(error.toString()));

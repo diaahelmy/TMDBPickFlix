@@ -5,6 +5,7 @@ import '../../../../models/movie_detail_model.dart';
 import '../../../../models/video_result.dart';
 import '../../../../view/cubit/detail/movie_detail_cubit.dart';
 import '../../../../view/cubit/detail/movie_detail_state.dart';
+import '../../../component/favorate/favorite_button.dart';
 import '../../../component/no_internet/no_internet_widget.dart';
 import '../../../component/video_player/video_player_dialog.dart';
 
@@ -132,43 +133,7 @@ class _DetailView extends StatelessWidget {
 
       // Custom actions
       actions: [
-        Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.6),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.2),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Added to favorites'),
-                  backgroundColor: const Color(0xFFFF6B35),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              );
-            },
-            icon: const Icon(
-              Icons.favorite_border,
-              color: Colors.white,
-              size: 22,
-            ),
-          ),
-        ),
+        FavoriteButton(movieDetail:movieDetail),
         Container(
           margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
           decoration: BoxDecoration(

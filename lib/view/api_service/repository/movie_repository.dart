@@ -66,4 +66,62 @@ class MovieRepository {
     return apiService.searchMulti(query, page: page);
   }
 
+
+  Future<void> toggleFavorite({
+    required int accountId,
+    required String sessionId,
+    required int mediaId,
+    required String mediaType,
+    required bool favorite,
+  }) {
+    return apiService.markAsFavorite(
+      accountId: accountId,
+      sessionId: sessionId,
+      mediaId: mediaId,
+      mediaType: mediaType,
+      favorite: favorite,
+    );
+  }
+
+  Future<void> toggleWatchlist({
+    required int accountId,
+    required String sessionId,
+    required int mediaId,
+    required String mediaType,
+    required bool watchlist,
+  }) {
+    return apiService.addToWatchlist(
+      accountId: accountId,
+      sessionId: sessionId,
+      mediaId: mediaId,
+      mediaType: mediaType,
+      watchlist: watchlist,
+    );
+  }
+
+  Future<List<Movie>> fetchFavorites({
+    required int accountId,
+    required String sessionId,
+    int page = 1,
+  }) {
+    return apiService.getFavoriteMovies(
+      accountId: accountId,
+      sessionId: sessionId,
+      page: page,
+    );
+  }
+
+  Future<List<Movie>> fetchWatchlist({
+    required int accountId,
+    required String sessionId,
+    int page = 1,
+  }) {
+    return apiService.getWatchlistMovies(
+      accountId: accountId,
+      sessionId: sessionId,
+      page: page,
+    );
+  }
+
+
 }

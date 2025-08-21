@@ -6,6 +6,7 @@ import '../../../view/cubit/home/popular/popular_movies_cubit.dart';
 import '../../../view/cubit/home/top_rate/home_toprated_cubit.dart';
 import '../../../view/cubit/home/upcoming/home_upcoming_cubit.dart';
 import '../../../view/cubit/tab_change/TabState.dart';
+import '../../screens/item/favorites_screen.dart';
 import '../../screens/move_pages/detail/movie_detail_screen.dart';
 import '../navigation_helper.dart';
 import 'build_quick_action_card.dart';
@@ -261,6 +262,7 @@ Widget buildActionButtons(BuildContext context) {
               label: 'Favorites',
               color: isDark ? const Color(0xFF161B22) : Colors.grey[100]!,
               onTap: () {
+                navigateTo(context,FavoritesScreen());
                 // Favorites action
               },
             ),
