@@ -14,7 +14,7 @@ PickFlix is a Flutter app for browsing and discovering movies and TV shows using
 ## Screenshots
 
 <p align="center">
-  <img src="assets/images/tvpage.jpeg" width="702"/>
+  <img src="assets/images/tvpage.jpeg" width="250"/>
   <img src="assets/images/search.jpeg" width="250"/>
   <img src="assets/images/detils.jpeg" width="250"/>
   <img src="assets/images/upcoming.jpeg" width="250"/>
