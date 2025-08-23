@@ -7,6 +7,7 @@ import 'package:pick_flix/ui/component/no_internet/compact_noInternet_widget.dar
 import 'package:pick_flix/ui/component/no_internet/no_internet_widget.dart';
 import '../../../models/movie_model.dart';
 import '../../../models/search_result.dart';
+import '../../../view/cubit/favorites/favorites_cubit.dart';
 import '../../../view/cubit/tab_change/TabState.dart';
 import '../../screens/move_pages/detail/movie_detail_screen.dart';
 
@@ -19,6 +20,8 @@ class PaginatedMovieListScreen<TCubit extends Cubit<TState>, TState, TItem exten
   final bool Function(TState state) isError;
   final bool Function(TCubit cubit) isLoadingMore;
   final bool Function(TCubit cubit) hasErrorLoadingMore;
+  final Widget? emptyWidget;
+
 
   const PaginatedMovieListScreen({
     super.key,
@@ -29,6 +32,8 @@ class PaginatedMovieListScreen<TCubit extends Cubit<TState>, TState, TItem exten
     required this.isError,
     required this.isLoadingMore,
     required this.hasErrorLoadingMore,
+    this.emptyWidget,
+
   });
 
   bool _onScrollNotification(
@@ -71,50 +76,61 @@ class PaginatedMovieListScreen<TCubit extends Cubit<TState>, TState, TItem exten
           if (alreadyLoaded) {
             return NotificationListener<ScrollNotification>(
               onNotification: (notif) => _onScrollNotification(notif, cubit, state),
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    MovieGrid(
-                      items: movies, //  TItem extends Movie
-                      crossAxisCount: 2,
-                      showDetails: true,
-                      showDescription: true,
-                      onItemTap: (movie) {
-                        final selectedTab = context.read<TabCubit>().state.selectedTab;
-                        final source = selectedTab == ContentType.movie
-                            ? MediaType.movie.name
-                            : MediaType.tv.name;
+              child: RefreshIndicator(
+                onRefresh: () => fetchMovies(cubit, loadMore: false),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    children: [
+                      MovieGrid(
+                        items: movies,
+                        crossAxisCount: 2,
+                        showDetails: true,
+                        showDescription: true,
+                        onItemTap: (movie) {
+                          final selectedTab = context.read<TabCubit>().state.selectedTab;
+                          final source = selectedTab == ContentType.movie
+                              ? MediaType.movie.name
+                              : MediaType.tv.name;
 
-                        navigateTo(
-                          context,
-                          MovieDetailScreen(
-                            id: movie.id,
-                            source: source,
-                          ),
-                        );
-                      },
-                    ),
-                    if (isLoadingMore(cubit) && !hasErrorLoadingMore(cubit))
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16.0),
-                        child: CircularProgressIndicator(),
-                      ),
-                    if (hasErrorLoadingMore(cubit))
-                      CompactNoInternetWidget(
-                        onRetry: () {
-                          fetchMovies(cubit, loadMore: true);
+                          navigateTo(
+                            context,
+                            MovieDetailScreen(
+                              id: movie.id,
+                              source: source,
+                            ),
+                          );
+
+                        },
+                        onFavoriteTap: (movie) {
+                          context.read<FavoritesCubit>().toggleFavorite(movie, isFavorite: true);
                         },
                       ),
-                    const SizedBox(height: 16),
-                  ],
+                      if (isLoadingMore(cubit) && !hasErrorLoadingMore(cubit))
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                      if (hasErrorLoadingMore(cubit))
+                        CompactNoInternetWidget(
+                          onRetry: () {
+                            fetchMovies(cubit, loadMore: true);
+                          },
+                        ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
                 ),
               ),
             );
           }
 
-          return const Center(child: Text('No data available'));
+          // 👇 لو مافيش داتا استخدم الـ emptyWidget لو متوفر
+          return emptyWidget ??
+              const Center(child: Text('No data available'));
         },
       ),
     );
   }
 }
+

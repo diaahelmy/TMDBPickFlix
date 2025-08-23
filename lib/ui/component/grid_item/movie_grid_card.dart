@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../../../models/movie_model.dart';
+import '../favorate/favorite_button.dart';
 
 class MovieGridCard extends StatelessWidget {
   final Movie movie;
   final bool isSelected;
   final bool showDetails;
   final bool showDescription;
+
+  /// ✅ callback عشان تتحكم في الـ favorite من الـ UI/Cubit
   final ValueChanged<Movie>? onTap;
+  final ValueChanged<Movie>? onFavoriteTap;
 
   const MovieGridCard({
     super.key,
@@ -15,6 +19,7 @@ class MovieGridCard extends StatelessWidget {
     required this.showDetails,
     required this.showDescription,
     this.onTap,
+    this.onFavoriteTap,
   });
 
   @override
@@ -37,7 +42,7 @@ class MovieGridCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildPoster(theme),
+              _buildPoster(theme, context),
               _buildTitle(theme),
               if (showDescription) _buildDescription(theme),
               if (showDetails) _buildRating(theme),
@@ -48,7 +53,7 @@ class MovieGridCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPoster(ThemeData theme) {
+  Widget _buildPoster(ThemeData theme, BuildContext context) {
     return Expanded(
       child: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
@@ -67,6 +72,15 @@ class MovieGridCard extends StatelessWidget {
             ),
             if (isSelected) _selectionOverlay(theme),
             if (isSelected) _checkIcon(theme),
+
+            /// ✅ زرار المفضلة بيتحكم فيه الـ Cubit
+            Positioned(
+              top: 8,
+              left: 8,
+              child: FavoriteButton(
+                movie: movie,
+              ),
+            ),
           ],
         ),
       ),
@@ -142,7 +156,9 @@ class MovieGridCard extends StatelessWidget {
         style: theme.textTheme.bodyMedium?.copyWith(
           fontWeight: FontWeight.w600,
           fontSize: 13,
-          color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+          color: isSelected
+              ? theme.colorScheme.primary
+              : theme.colorScheme.onSurface,
         ),
         textAlign: TextAlign.center,
         maxLines: 2,

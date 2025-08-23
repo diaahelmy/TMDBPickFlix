@@ -6,6 +6,7 @@ import 'base_grid.dart';
 class MovieGrid extends BaseGrid<Movie> {
   final bool showDetails;
   final bool showDescription;
+  final void Function(Movie movie)? onFavoriteTap;
 
   const MovieGrid({
     super.key,
@@ -15,6 +16,7 @@ class MovieGrid extends BaseGrid<Movie> {
     super.itemLimit,
     super.crossAxisCount = 3,
     this.showDetails = false,
+    this.onFavoriteTap,
     this.showDescription = false,
   });
 
@@ -26,6 +28,10 @@ class MovieGrid extends BaseGrid<Movie> {
       showDetails: showDetails,
       showDescription: showDescription,
       onTap: onItemTap,
+      onFavoriteTap: onFavoriteTap,
     );
+
+
+
   }
 }

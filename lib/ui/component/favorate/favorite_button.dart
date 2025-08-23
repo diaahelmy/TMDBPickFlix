@@ -1,3 +1,4 @@
+// favorite_button.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../models/movie_model.dart';
@@ -6,15 +7,52 @@ import '../../../models/search_result.dart';
 import '../../../view/cubit/favorites/favorites_cubit.dart';
 import '../../../view/cubit/favorites/favorites_state.dart';
 
-class FavoriteButton extends StatelessWidget {
+class FavoriteButton extends StatefulWidget {
   final Movie? movie;
   final MovieDetail? movieDetail;
+  final bool isLarge; // ✅ للتحكم في الحجم
 
-  const FavoriteButton({super.key, this.movie, this.movieDetail})
-    : assert(
-        movie != null || movieDetail != null,
-        'Either movie or movieDetail must be provided',
-      );
+  const FavoriteButton({
+    super.key,
+    this.movie,
+    this.movieDetail,
+    this.isLarge = false, // ✅ default صغير للكاردز
+  }) : assert(
+  movie != null || movieDetail != null,
+  'Either movie or movieDetail must be provided',
+  );
+
+  @override
+  State<FavoriteButton> createState() => _FavoriteButtonState();
+}
+
+class _FavoriteButtonState extends State<FavoriteButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.85,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,75 +60,81 @@ class FavoriteButton extends StatelessWidget {
       builder: (context, state) {
         final favoritesCubit = context.read<FavoritesCubit>();
 
-        // الحصول على الـ id والعنوان
-        final movieId = movie?.id ?? movieDetail!.id;
-        final movieTitle = movie?.title ?? movieDetail!.title;
+        final movieId = widget.movie?.id ?? widget.movieDetail!.id;
+        final isFavorite =
+        favoritesCubit.cachedFavorites.any((m) => m.id == movieId);
 
-        final isFavorite = favoritesCubit.cachedFavorites.any(
-          (m) => m.id == movieId,
-        );
+        final movieToSave = widget.movie ?? _movieDetailToMovie(widget.movieDetail!);
 
-        // تحويل MovieDetail إلى Movie إذا لزم الأمر
-        final movieToSave = movie ?? _movieDetailToMovie(movieDetail!);
+        // ✅ أحجام مختلفة حسب المكان
+        final containerSize = widget.isLarge ? 44.0 : 28.0;
+        final iconSize = widget.isLarge ? 24.0 : 16.0;
+        final positionOffset = widget.isLarge ? 12.0 : 6.0;
 
-        return Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.6),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: IconButton(
-            icon: Icon(
-              isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: isFavorite ? Colors.red : Colors.white,
-              size: 22,
-            ),
-            onPressed: () async {
-              final wasAlreadyFavorite = isFavorite;
-         // أو MediaType.tv.name إذا المسلسل
-              final mediaType =
-                  MediaType.movie.name;
-              // استدعاء toggleFavorite مع النوع الصحيح
-              await favoritesCubit.toggleFavoriteDynamic(
-                isFavorite: !wasAlreadyFavorite, movie: movieToSave,
-              );
+        return Positioned(
+          top: positionOffset,
+          right: positionOffset,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: GestureDetector(
+              onTapDown: (_) => _controller.forward(),
+              onTapUp: (_) => _controller.reverse(),
+              onTapCancel: () => _controller.reverse(),
+              onTap: () async {
+                final wasAlreadyFavorite = isFavorite;
 
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      wasAlreadyFavorite
-                          ? 'Removed from favorites'
-                          : 'Added to favorites',
-                    ),
-                    backgroundColor: const Color(0xFFFF6B35),
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    duration: const Duration(seconds: 2),
-                  ),
+                await favoritesCubit.toggleFavorite(
+                  movieToSave,
+                  isFavorite: !wasAlreadyFavorite,
                 );
-              }
-            },
+
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        wasAlreadyFavorite
+                            ? 'Removed from favorites'
+                            : 'Added to favorites',
+                      ),
+                      backgroundColor: Colors.grey[800],
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      duration: const Duration(milliseconds: 1200),
+                    ),
+                  );
+                }
+              },
+              child: Container(
+                width: containerSize,
+                height: containerSize,
+                decoration: BoxDecoration(
+                  color: widget.isLarge
+                      ? Colors.black.withOpacity(0.7)
+                      : Colors.black.withOpacity(0.6),
+                  shape: BoxShape.circle,
+                  border: widget.isLarge
+                      ? Border.all(color: Colors.white.withOpacity(0.2), width: 1)
+                      : null,
+                ),
+                child: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorite ? Colors.red[400] : Colors.white,
+                  size: iconSize,
+                ),
+              ),
+            ),
           ),
         );
       },
     );
   }
 
-  /// تحويل MovieDetail إلى Movie
   Movie _movieDetailToMovie(MovieDetail movieDetail) {
     final mediaType =
-        MediaType.movie.name;
+    movieDetail.runtime != null ? MediaType.movie.name : MediaType.tv.name;
+
     return Movie(
       id: movieDetail.id,
       title: movieDetail.title,

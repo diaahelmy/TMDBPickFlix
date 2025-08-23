@@ -1,7 +1,7 @@
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pick_flix/models/search_result.dart';
-import '../../../../models/movie_model.dart';
+import 'package:pick_flix/models/movie_model.dart';
 import '../../api_service/repository/movie_repository.dart';
 import 'favorites_state.dart';
 
@@ -10,7 +10,8 @@ class FavoritesCubit extends Cubit<FavoritesState> {
   final int accountId;
   final String sessionId;
 
-  FavoritesCubit(this.repository, this.accountId, this.sessionId) : super(FavoritesInitial());
+  FavoritesCubit(this.repository, this.accountId, this.sessionId)
+      : super(FavoritesInitial());
 
   int _currentPage = 1;
   final List<Movie> _favorites = [];
@@ -22,8 +23,11 @@ class FavoritesCubit extends Cubit<FavoritesState> {
   bool get isLoadingMore => _isLoadingMore;
   bool get hasReachedMax => _hasReachedMax;
 
-  /// ✅ جلب الفيفوريت
-  Future<void> fetchFavorites({bool loadMore = false}) async {
+  Future<void> fetchFavorites({
+    bool loadMore = false,
+    required String mediaType,
+    int batchSize = 60,
+  }) async {
     try {
       if (_isLoadingMore && loadMore) return;
       if (loadMore && _hasReachedMax) return;
@@ -41,27 +45,39 @@ class FavoritesCubit extends Cubit<FavoritesState> {
         emit(FavoritesLoaded(List.of(_favorites)));
       }
 
-      final newMovies = await repository.fetchFavorites(
-        accountId: accountId,
-        sessionId: sessionId,
-        page: _currentPage,
-      );
+      final List<Movie> batchItems = [];
 
-      if (newMovies.length < 20) {
-        _hasReachedMax = true;
+      // نجيب كذا صفحة لحد ما نوصل batchSize
+      while (batchItems.length < batchSize) {
+        final newItems = await repository.fetchFavorites(
+          mediaType: mediaType,
+          accountId: accountId,
+          sessionId: sessionId,
+          page: _currentPage,
+        );
+
+        if (newItems.isEmpty) {
+          _hasReachedMax = true;
+          break;
+        }
+
+        batchItems.addAll(newItems.map((m) => m.copyWith(type: mediaType)));
+
+        if (newItems.length < 20) {
+          _hasReachedMax = true;
+          break;
+        }
+
+        _currentPage++;
       }
 
-      if (newMovies.isNotEmpty) {
-        _favorites.addAll(newMovies);
-        _currentPage++;
-      } else {
-        _hasReachedMax = true;
+      if (batchItems.isNotEmpty) {
+        _favorites.addAll(batchItems);
       }
 
       emit(FavoritesLoaded(List.of(_favorites)));
     } catch (e) {
       debugPrint("❌ Error fetching favorites: $e");
-
       if (loadMore) {
         hasErrorLoadingMore = true;
         emit(FavoritesLoaded(List.of(_favorites)));
@@ -73,12 +89,11 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     }
   }
 
-  /// ✅ تحديث البيانات (سحب للتحديث)
-  Future<void> refresh() async {
-    await fetchFavorites(loadMore: false);
+
+  Future<void> refresh({required String mediaType}) async {
+    await fetchFavorites(loadMore: false, mediaType: mediaType);
   }
 
-  /// ✅ مسح الكاش
   void clearCache() {
     _favorites.clear();
     _currentPage = 1;
@@ -87,13 +102,9 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     emit(FavoritesInitial());
   }
 
-  Future<void> toggleFavoriteDynamic({
-    required Movie movie, // أو MovieDetail لو حبيت تدعم MovieDetail
-    required bool isFavorite,
-  }) async {
+  Future<void> toggleFavorite(Movie movie, {required bool isFavorite}) async {
     try {
-      // هنا نفترض أن Movie يحتوي على type: "movie" أو "tv"
-      final mediaType = (movie.type == "tv") ? "tv" : "movie";
+      final mediaType = movie.type;
 
       await repository.toggleFavorite(
         accountId: accountId,
@@ -104,11 +115,11 @@ class FavoritesCubit extends Cubit<FavoritesState> {
       );
 
       if (isFavorite) {
-        if (!_favorites.any((m) => m.id == movie.id)) {
-          _favorites.insert(0, movie);
+        if (!_favorites.any((m) => m.id == movie.id && m.type == movie.type)) {
+          _favorites.insert(0, movie.copyWith(type: mediaType));
         }
       } else {
-        _favorites.removeWhere((m) => m.id == movie.id);
+        _favorites.removeWhere((m) => m.id == movie.id && m.type == movie.type);
       }
 
       emit(FavoritesLoaded(List.of(_favorites)));
@@ -117,6 +128,4 @@ class FavoritesCubit extends Cubit<FavoritesState> {
       emit(FavoritesError("Failed to update favorites"));
     }
   }
-
-
 }

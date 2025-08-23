@@ -15,7 +15,7 @@ class MovieDetail {
   final List<ProductionCompany> productionCompanies;
   final List<ProductionCountry> productionCountries;
   final List<SpokenLanguage> spokenLanguages;
-  final List<Video> videos; // تغيير النوع إلى Video
+  final List<Video> videos;
   final List<Review> reviews;
   final int? budget;
   final int? revenue;
@@ -24,6 +24,7 @@ class MovieDetail {
   final String? imdbId;
   final String? homepage;
   final bool adult;
+  final String mediaType;
 
   MovieDetail({
     required this.id,
@@ -49,6 +50,8 @@ class MovieDetail {
     this.imdbId,
     this.homepage,
     required this.adult,
+    required this.mediaType, // ← إضافة إلى الكونستركتور
+
   });
 
   factory MovieDetail.fromJson(Map<String, dynamic> json) {
@@ -88,6 +91,8 @@ class MovieDetail {
       imdbId: json['imdb_id'],
       homepage: json['homepage'],
       adult: json['adult'] ?? false,
+      mediaType: json['media_type'] ?? 'movie', // ← هنا نقرأ media_type
+
     );
   }
 

@@ -35,30 +35,29 @@ void main() async {
 
   final selectedGenres = SelectedPreferencesHelper.getSelectedGenres();
   final selectedMovies = SelectedPreferencesHelper.getSelectedItems();
-  final savedSessionId = prefs.getString('session_id');
+
   Widget initialScreen;
-
-
-  if (savedSessionId != null && savedSessionId.isNotEmpty) {
-    // عندنا session محفوظ → نروح عـ Home
+  if (sessionId != null && sessionId.isNotEmpty) {
     initialScreen = const MainScreen();
   } else {
-    // لو مفيش Session → نمشي بالخطوات القديمة
     if (selectedGenres.isEmpty) {
       initialScreen = const GenreScreen();
     } else if (selectedMovies.isEmpty) {
-      initialScreen =  FavoritesSelectionScreen();
+      initialScreen = FavoritesSelectionScreen();
     } else {
       initialScreen = LoginScreen();
     }
   }
 
-
   runApp(
     RepositoryProvider<MovieRepository>(
       create: (_) => MovieRepository(ApiService()),
-      child: MyApp(initialScreen: initialScreen, selectedItems: selectedMovies,    sessionId: sessionId,
-        accountId: accountId,),
+      child: MyApp(
+        initialScreen: initialScreen,
+        selectedItems: selectedMovies,
+        sessionId: sessionId,
+        accountId: accountId,
+      ),
     ),
   );
 }
@@ -68,6 +67,7 @@ class MyApp extends StatelessWidget {
   final List<SelectedMovieWithSource> selectedItems;
   final String? sessionId;
   final int? accountId;
+
   const MyApp({
     super.key,
     this.sessionId,
@@ -88,57 +88,32 @@ class MyApp extends StatelessWidget {
         return MultiBlocProvider(
           providers: [
             BlocProvider(
-              create: (context) => MovieBloc(repository)
+              create: (_) => MovieBloc(repository)
                 ..add(FetchTopRatedMovies())
                 ..add(FetchTopRatedTv()),
             ),
-            BlocProvider(
-              create: (_) => CubitSplitScreenBloc()..add(LoadGenres()),
-            ),
+            BlocProvider(create: (_) => CubitSplitScreenBloc()..add(LoadGenres())),
             BlocProvider(create: (_) => MainCubit()),
-            BlocProvider(create: (context) => HomeCubit()),
+            BlocProvider(create: (_) => HomeCubit()),
             BlocProvider(
-              create: (context) =>
-                  HomeMoviesRecommendationCubit(repository)
-                    ..fetchRecommendations(selectedItems),
+              create: (_) =>
+              HomeMoviesRecommendationCubit(repository)..fetchRecommendations(selectedItems),
             ),
-            BlocProvider(
-              create: (context) => FavoritesCubit(
-                repository,
-                accountId ?? 0,
-                sessionId ?? '',
+            if (sessionId != null && accountId != null)
+              BlocProvider(
+                create: (_) => FavoritesCubit(repository, accountId!, sessionId!)..fetchFavorites(mediaType: 'movie'),
               ),
-            ),
-
-
-            // BlocProvider(
-            //   create: (context) => HomeGenreRecommendationCubit(repository),
-            // ),
+            BlocProvider(create: (_) => TabCubit()),
             BlocProvider(
-              create: (context) => TabCubit(),
+              create: (_) => HomePopularCubit(repository)..fetchPopularMovies(ContentType.movie),
             ),
             BlocProvider(
-              create: (context) =>
-                  HomePopularCubit(repository)..fetchPopularMovies(
-                  ContentType.movie,),
+              create: (_) => HomeUpcomingCubit(repository)..fetchUpcomingMovies(ContentType.movie),
             ),
             BlocProvider(
-              create: (context) =>
-                  HomeUpcomingCubit(repository)..fetchUpcomingMovies(
-                    ContentType.movie,
-                  ),
+              create: (_) => HomeTopRatedCubit(repository)..fetchTopRatedMovies(ContentType.movie),
             ),
-            BlocProvider(
-              create: (context) =>
-                  HomeTopRatedCubit(repository)..fetchTopRatedMovies(
-                      ContentType.movie
-                  ),
-            ),
-
-            BlocProvider(
-              create: (context) =>
-                  SearchCubit(movieRepository: repository)..searchMovies(''),
-            ),
+            BlocProvider(create: (_) => SearchCubit(movieRepository: repository)),
           ],
           child: MaterialApp(
             debugShowCheckedModeBanner: false,

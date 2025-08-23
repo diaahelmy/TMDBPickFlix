@@ -83,6 +83,20 @@ class MovieRepository {
     );
   }
 
+  Future<List<Movie>> fetchFavorites({
+    required int accountId,
+    required String sessionId,
+    required String mediaType,
+    int page = 1,
+  }) {
+    return apiService.getFavorites(
+      accountId: accountId,
+      sessionId: sessionId,
+      mediaType: mediaType,
+      page: page,
+    );
+  }
+
   Future<void> toggleWatchlist({
     required int accountId,
     required String sessionId,
@@ -99,24 +113,17 @@ class MovieRepository {
     );
   }
 
-  Future<List<Movie>> fetchFavorites({
-    required int accountId,
-    required String sessionId,
-    int page = 1,
-  }) {
-    return apiService.getFavoriteMovies(
-      accountId: accountId,
-      sessionId: sessionId,
-      page: page,
-    );
-  }
+
 
   Future<List<Movie>> fetchWatchlist({
     required int accountId,
     required String sessionId,
+    required String mediaType, // "movie" أو "tv"
+
     int page = 1,
   }) {
-    return apiService.getWatchlistMovies(
+    return apiService.getWatchlist(
+      mediaType: mediaType,
       accountId: accountId,
       sessionId: sessionId,
       page: page,

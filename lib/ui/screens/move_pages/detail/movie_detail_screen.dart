@@ -133,7 +133,7 @@ class _DetailView extends StatelessWidget {
 
       // Custom actions
       actions: [
-        FavoriteButton(movieDetail:movieDetail),
+        FavoriteButton(movieDetail:movieDetail,isLarge: true),
         Container(
           margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
           decoration: BoxDecoration(

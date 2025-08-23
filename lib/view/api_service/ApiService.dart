@@ -167,15 +167,46 @@ import '../../models/search_result.dart';
       } else {
         throw Exception('Failed to fetch account details');
       }
+      }
+
+    Future<void> addToWatchlist({
+        required int accountId,
+        required String sessionId,
+        required int mediaId,
+        required String mediaType, // "movie" or "tv"
+        required bool watchlist,
+      }) async {
+        final url = '$_baseUrl/account/$accountId/watchlist?api_key=$_apiKey&session_id=$sessionId';
+
+        final response = await http.post(
+          Uri.parse(url),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({
+            "media_type": mediaType,
+            "media_id": mediaId,
+            "watchlist": watchlist,
+          }),
+        );
+
+        if (response.statusCode != 200 && response.statusCode != 201) {
+          throw Exception('Failed to update watchlist');
+        }
+      }
+    String mapMediaTypeToEndpoint(String mediaType) {
+      if (mediaType == MediaType.movie.name) return "movies";
+      if (mediaType == MediaType.tv.name) return "tv";
+      return mediaType;
     }
+
     Future<void> markAsFavorite({
       required int accountId,
       required String sessionId,
       required int mediaId,
-      required String mediaType, // "movie" or "tv"
+      required String mediaType,
       required bool favorite,
     }) async {
-      final url = '$_baseUrl/account/$accountId/favorite?api_key=$_apiKey&session_id=$sessionId';
+      final url =
+          '$_baseUrl/account/$accountId/favorite?api_key=$_apiKey&session_id=$sessionId';
 
       final response = await http.post(
         Uri.parse(url),
@@ -188,74 +219,51 @@ import '../../models/search_result.dart';
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        // اطبع تفاصيل الخطأ من TMDB
         throw Exception(
-          'Failed to update favorite: ${response.statusCode} ${response.body}',
-        );
+            'Failed to update favorite: ${response.statusCode} ${response.body}');
       } else {
         final data = jsonDecode(response.body);
         debugPrint("✅ Favorite updated successfully: $data");
       }
     }
 
-    Future<void> addToWatchlist({
+    Future<List<Movie>> getFavorites({
       required int accountId,
       required String sessionId,
-      required int mediaId,
-      required String mediaType, // "movie" or "tv"
-      required bool watchlist,
-    }) async {
-      final url = '$_baseUrl/account/$accountId/watchlist?api_key=$_apiKey&session_id=$sessionId';
-
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "media_type": mediaType,
-          "media_id": mediaId,
-          "watchlist": watchlist,
-        }),
-      );
-
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception('Failed to update watchlist');
-      }
-    }
-    Future<List<Movie>> getFavoriteMovies({
-      required int accountId,
-      required String sessionId,
+      required String mediaType,
       int page = 1,
     }) async {
+      final endpoint = mapMediaTypeToEndpoint(mediaType);
       final url =
-          '$_baseUrl/account/$accountId/favorite/movies?api_key=$_apiKey&session_id=$sessionId&page=$page';
-
-      final response = await http.get(Uri.parse(url));
-
-      if (response.statusCode == 200 && response.statusCode != 201) {
-        final data = jsonDecode(response.body);
-        List movies = data['results'];
-        return movies.map((json) => Movie.fromJson(json)).toList();
-      } else {
-        throw Exception('Failed to load favorite movies');
-      }
-    }
-
-    Future<List<Movie>> getWatchlistMovies({
-      required int accountId,
-      required String sessionId,
-      int page = 1,
-    }) async {
-      final url =
-          '$_baseUrl/account/$accountId/watchlist/movies?api_key=$_apiKey&session_id=$sessionId&page=$page';
+          '$_baseUrl/account/$accountId/favorite/$endpoint?api_key=$_apiKey&session_id=$sessionId&page=$page';
 
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        List movies = data['results'];
-        return movies.map((json) => Movie.fromJson(json)).toList();
+        List items = data['results'];
+        return items.map((json) => Movie.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to load watchlist movies');
+        throw Exception('Failed to load favorite $mediaType');
+      }
+    }
+    Future<List<Movie>> getWatchlist({
+      required int accountId,
+      required String sessionId,
+      required String mediaType, // "movie" أو "tv"
+      int page = 1,
+    }) async {
+      final url =
+          '$_baseUrl/account/$accountId/watchlist/$mediaType?api_key=$_apiKey&session_id=$sessionId&page=$page';
+
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        List items = data['results'];
+        return items.map((json) => Movie.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load watchlist $mediaType');
       }
     }
 

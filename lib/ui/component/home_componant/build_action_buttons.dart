@@ -18,6 +18,10 @@ Widget buildActionButtons(BuildContext context) {
   final source = selectedTab == ContentType.movie
       ? MediaType.movie.name
       : MediaType.tv.name;
+  final mediaType = selectedTab == ContentType.movie
+      ? MediaType.movie
+      : MediaType.tv;
+
   return Column(
     children: [
       // Movie Deal Button
@@ -262,7 +266,10 @@ Widget buildActionButtons(BuildContext context) {
               label: 'Favorites',
               color: isDark ? const Color(0xFF161B22) : Colors.grey[100]!,
               onTap: () {
-                navigateTo(context,FavoritesScreen());
+                navigateTo(context,FavoritesScreen(
+
+                  mediaType: mediaType,
+                ));
                 // Favorites action
               },
             ),
