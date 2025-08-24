@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../models/movie_model.dart';
+import '../../screens/item/movie_actions_bottom_sheet.dart';
 import '../favorate/favorite_button.dart';
+import '../favorate/watchlist_button.dart';
 
 class MovieGridCard extends StatelessWidget {
   final Movie movie;
@@ -28,6 +30,7 @@ class MovieGridCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () => onTap?.call(movie),
+      onLongPress: () => MovieActionsBottomSheet.show(context, movie),
       child: AnimatedScale(
         scale: isSelected ? 1.02 : 1.0,
         duration: const Duration(milliseconds: 200),
@@ -73,16 +76,33 @@ class MovieGridCard extends StatelessWidget {
             if (isSelected) _selectionOverlay(theme),
             if (isSelected) _checkIcon(theme),
 
-            /// ✅ زرار المفضلة بيتحكم فيه الـ Cubit
-            Positioned(
-              top: 8,
-              left: 8,
-              child: FavoriteButton(
-                movie: movie,
-              ),
-            ),
+            // ✅ أزرار التحكم - تم ترتيبها بشكل أفضل
+            _buildControlButtons(),
           ],
         ),
+      ),
+    );
+  }
+
+  // ✅ ويدجت منفصل لأزرار التحكم مع تنسيق أفضل
+  Widget _buildControlButtons() {
+    return Positioned(
+      top: 8,
+      left: 8,
+      right: 8,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // زرار المفضلة في اليسار
+          FavoriteButton(
+            movie: movie,
+          ),
+          // زرار الـ Watchlist في اليمين
+          WatchlistButton(
+            movie: movie,
+            isLarge: false,
+          ),
+        ],
       ),
     );
   }
@@ -124,7 +144,7 @@ class MovieGridCard extends StatelessWidget {
 
   Widget _checkIcon(ThemeData theme) {
     return Positioned(
-      top: 8,
+      bottom: 8,
       right: 8,
       child: Container(
         decoration: BoxDecoration(

@@ -253,12 +253,13 @@ import '../../models/search_result.dart';
       required String mediaType, // "movie" أو "tv"
       int page = 1,
     }) async {
+      final endpoint = mapMediaTypeToEndpoint(mediaType);
       final url =
-          '$_baseUrl/account/$accountId/watchlist/$mediaType?api_key=$_apiKey&session_id=$sessionId&page=$page';
+          '$_baseUrl/account/$accountId/watchlist/$endpoint?api_key=$_apiKey&session_id=$sessionId&page=$page';
 
       final response = await http.get(Uri.parse(url));
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200  ) {
         final data = jsonDecode(response.body);
         List items = data['results'];
         return items.map((json) => Movie.fromJson(json)).toList();

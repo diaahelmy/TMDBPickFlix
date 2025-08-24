@@ -4,6 +4,7 @@
   import 'package:pick_flix/ui/component/navigation_helper.dart';
   import 'package:pick_flix/ui/screens/move_pages/up_coming_screen.dart';
 import 'package:pick_flix/view/cubit/favorites/favorites_cubit.dart';
+import 'package:pick_flix/view/cubit/watchlist/watchlist_cubit.dart';
   import '../../../view/cubit/home/general_recommendation/home_genre_recommendation_cubit.dart';
   import '../../../view/cubit/home/home_movies_recommendation/home_movies_recommendation_cubit.dart';
   import '../../../view/cubit/home/home_movies_recommendation/home_movies_recommendation_state.dart';
@@ -96,6 +97,7 @@ import 'package:pick_flix/view/cubit/favorites/favorites_cubit.dart';
             context.read<HomeTopRatedCubit>().fetchTopRatedMovies(state.selectedTab);
             final mediaType = _mapContentTypeToApi(state.selectedTab);
             context.read<FavoritesCubit>().refresh(mediaType: mediaType);
+            context.read<WatchlistCubit>().refresh(mediaType: mediaType);
           },
         ),
       );    }

@@ -5,7 +5,6 @@ import 'package:pick_flix/ui/screens/genre_screen.dart';
 import 'package:pick_flix/ui/screens/login-out/login_screen.dart';
 import 'package:pick_flix/ui/screens/main_screen.dart';
 import 'package:pick_flix/ui/screens/movies_screen.dart';
-import 'package:pick_flix/ui/screens/navbarmenu/home_screen.dart';
 import 'package:pick_flix/view/api_service/ApiService.dart';
 import 'package:pick_flix/view/api_service/repository/movie_repository.dart';
 import 'package:pick_flix/view/cubit/favorites/favorites_cubit.dart';
@@ -19,6 +18,7 @@ import 'package:pick_flix/view/cubit/movie/movie_bloc.dart';
 import 'package:pick_flix/view/cubit/search/search_cubit.dart';
 import 'package:pick_flix/view/cubit/split_screen/cubit_split_screen.dart';
 import 'package:pick_flix/view/cubit/tab_change/TabState.dart';
+import 'package:pick_flix/view/cubit/watchlist/watchlist_cubit.dart';
 import 'package:pick_flix/view/data/genre_event.dart';
 import 'package:pick_flix/view/data/movie_event.dart';
 import 'package:pick_flix/view/helper/SelectedPreferencesHelper.dart';
@@ -86,43 +86,53 @@ class MyApp extends StatelessWidget {
       splitScreenMode: true,
       builder: (context, child) {
         return MultiBlocProvider(
-          providers: [
+            providers: [
             BlocProvider(
-              create: (_) => MovieBloc(repository)
-                ..add(FetchTopRatedMovies())
-                ..add(FetchTopRatedTv()),
-            ),
-            BlocProvider(create: (_) => CubitSplitScreenBloc()..add(LoadGenres())),
-            BlocProvider(create: (_) => MainCubit()),
-            BlocProvider(create: (_) => HomeCubit()),
-            BlocProvider(
-              create: (_) =>
-              HomeMoviesRecommendationCubit(repository)..fetchRecommendations(selectedItems),
-            ),
-            if (sessionId != null && accountId != null)
-              BlocProvider(
-                create: (_) => FavoritesCubit(repository, accountId!, sessionId!)..fetchFavorites(mediaType: 'movie'),
-              ),
-            BlocProvider(create: (_) => TabCubit()),
-            BlocProvider(
-              create: (_) => HomePopularCubit(repository)..fetchPopularMovies(ContentType.movie),
-            ),
-            BlocProvider(
-              create: (_) => HomeUpcomingCubit(repository)..fetchUpcomingMovies(ContentType.movie),
-            ),
-            BlocProvider(
-              create: (_) => HomeTopRatedCubit(repository)..fetchTopRatedMovies(ContentType.movie),
-            ),
-            BlocProvider(create: (_) => SearchCubit(movieRepository: repository)),
-          ],
-          child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: 'PickFlix',
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: ThemeMode.system,
-            home: initialScreen,
-          ),
+            create: (_)
+        =>
+        MovieBloc(repository)
+          ..add(FetchTopRatedMovies())..add(FetchTopRatedTv())
+        ,
+        ),
+        BlocProvider(create: (_) => CubitSplitScreenBloc()..add(LoadGenres())),
+        BlocProvider(create: (_) => MainCubit()),
+        BlocProvider(create: (_) => HomeCubit()),
+        BlocProvider(
+        create: (_) =>
+        HomeMoviesRecommendationCubit(repository)..fetchRecommendations(selectedItems),
+        ),
+        if (sessionId != null && accountId != null)
+        BlocProvider(
+        create: (_) => FavoritesCubit(repository, accountId!, sessionId!)..fetchFavorites(mediaType: 'movies'),
+        ),
+        BlocProvider(create: (_) => TabCubit()),
+        BlocProvider(
+        create: (_) => HomePopularCubit(repository)..fetchPopularMovies(ContentType.movie),
+        ),
+        BlocProvider(
+        create: (_) => HomeUpcomingCubit(repository)..fetchUpcomingMovies(ContentType.movie),
+        ),
+        BlocProvider(
+        create: (_) => HomeTopRatedCubit(repository)..fetchTopRatedMovies(ContentType.movie),
+        ),
+        BlocProvider(create: (_) => SearchCubit(movieRepository: repository)),
+        BlocProvider(
+        create: (_) => WatchlistCubit(
+        repository,
+        accountId!,
+        sessionId!,
+        )..fetchWatchlist(mediaType: 'movies'),
+
+        ),
+        ],
+        child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'PickFlix',
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        home: initialScreen,
+        ),
         );
       },
     );
